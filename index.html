@@ -8,7 +8,8 @@
 <style>
 body {
     font-family: 'Montserrat', sans-serif;
-    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e') center/cover no-repeat;
+    /* Фон с твоим фото с GitHub, заменяй ссылку */
+    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://raw.githubusercontent.com/твой-пользователь/репозиторий/ветка/имя_файла.jpg') center/cover no-repeat;
     color: #fff;
     text-align: center;
     min-height: 100vh;
@@ -25,61 +26,31 @@ h1 {
     font-family: 'Playfair Display', serif;
     margin-bottom: 10px;
 }
-p {
-    margin-bottom: 20px;
-}
-.step {
-    display: none;
-}
-.step.active {
-    display: block;
-    animation: fadeIn 0.5s;
-}
-@keyframes fadeIn {
-    from {opacity:0;} to {opacity:1;}
-}
-video, canvas {
-    width: 100%;
-    border-radius: 15px;
-    margin-bottom: 15px;
-}
+p { margin-bottom: 20px; }
+.step { display: none; }
+.step.active { display: block; animation: fadeIn 0.5s; }
+@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+video, canvas { width: 100%; border-radius: 15px; margin-bottom: 15px; }
 .btn {
-    background: #D4AF37;
-    color: #000;
-    border: none;
-    padding: 15px 30px;
-    border-radius: 50px;
-    margin: 10px;
-    font-size: 18px;
-    cursor: pointer;
-    transition: 0.3s;
+    background: #D4AF37; color: #000; border: none;
+    padding: 15px 30px; border-radius: 50px; margin: 10px;
+    font-size: 18px; cursor: pointer; transition: 0.3s;
 }
-.btn:hover {transform: translateY(-3px);}
-.btn-red {background:#f44336;color:#fff;}
+.btn:hover { transform: translateY(-3px); }
+.btn-red { background:#f44336;color:#fff; }
 .loader {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #D4AF37;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin: 20px auto;
-    display: none;
+    border: 4px solid #f3f3f3; border-top: 4px solid #D4AF37;
+    border-radius: 50%; width: 40px; height: 40px;
+    animation: spin 1s linear infinite; margin: 20px auto; display: none;
 }
-@keyframes spin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+@keyframes spin { 0%{transform:rotate(0deg);}100%{transform:rotate(360deg);} }
 .notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #D4AF37;
-    color: #000;
-    padding: 15px;
-    border-radius: 10px;
-    display: none;
-    font-weight: bold;
+    position: fixed; top: 20px; right: 20px;
+    background: #D4AF37; color: #000; padding: 15px; border-radius: 10px;
+    display: none; font-weight: bold;
 }
-.notification.error {background:#f44336;color:#fff;}
-.photo-list img {width:100%;border-radius:15px;margin-bottom:10px;}
+.notification.error { background:#f44336;color:#fff; }
+.photo-list img { width:100%; border-radius:15px; margin-bottom:10px; }
 </style>
 </head>
 <body>
@@ -90,7 +61,7 @@ video, canvas {
 <div id="step1" class="step active">
 <h1>📸 Добро пожаловать!</h1>
 <p>Сделайте фото на память нашего свадебного дня ❤️</p>
-<p>Вы можете сделать несколько фото, они автоматически сохранятся.</p>
+<p>Вы можете сделать несколько фото, они будут отображаться ниже.</p>
 <button class="btn" onclick="startCamera()">Начать фотографировать</button>
 </div>
 
@@ -106,36 +77,22 @@ video, canvas {
 
 <!-- ШАГ 3 -->
 <div id="step3" class="step">
-<h1>👀 Проверьте фото</h1>
+<h1>👀 Ваши фото</h1>
 <div class="photo-list" id="photoList"></div>
 <input type="text" id="userName" placeholder="Ваше имя (необязательно)">
 <textarea id="comment" placeholder="Комментарий (необязательно)" rows="2"></textarea>
 <div>
-<button class="btn" onclick="sendPhotos()" id="uploadBtn">📤 Отправить фото</button>
+<button class="btn" onclick="downloadPhotos()">💾 Скачать фото</button>
 <button class="btn btn-red" onclick="goToStep(2)">🔄 Сделать ещё фото</button>
 </div>
-<div class="loader" id="loader"></div>
-</div>
-
-<!-- ШАГ 4 -->
-<div id="step4" class="step">
-<h1>✅ Фото отправлено!</h1>
-<p>Спасибо! Фото сохранены.</p>
-<button class="btn" onclick="goToStep(1)">📸 Сделать еще фото</button>
-<p>Вы также можете оставить комментарий через форму:</p>
-<a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLSeiUNCamRqq2ixVA7objXizSqkJY1GLbPA9cn1sjnq0_TJn8Q/viewform?usp=sf_link" target="_blank">Перейти в форму</a>
 </div>
 
 </div>
-
 <div id="notification" class="notification"></div>
 
 <script>
-// ====== Переменные ======
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzFESSq5wXHO34-31ezqsuScbjiG7mtEgTAE48Xj8LgJIItDyBt-OFPCrRVJDtLnVJl7g/exec';
-let currentStep=1,videoStream=null,photos=[];
+let currentStep=1, videoStream=null, photos=[];
 
-// ====== Уведомления ======
 function showMsg(text,type='success'){
     const msg=document.getElementById('notification');
     msg.textContent=text;
@@ -144,7 +101,6 @@ function showMsg(text,type='success'){
     setTimeout(()=>{msg.style.display='none';},3000);
 }
 
-// ====== Переключение шагов ======
 function goToStep(step){
     document.querySelectorAll('.step').forEach(el=>el.classList.remove('active'));
     document.getElementById(`step${step}`).classList.add('active');
@@ -152,7 +108,6 @@ function goToStep(step){
     if(step!==2 && videoStream){videoStream.getTracks().forEach(t=>t.stop());videoStream=null;}
 }
 
-// ====== Камера ======
 async function startCamera(){
     try{
         if(videoStream){videoStream.getTracks().forEach(t=>t.stop());}
@@ -162,11 +117,10 @@ async function startCamera(){
     }catch(e){console.error(e);showMsg('Не удалось включить камеру','error');goToStep(1);}
 }
 
-// ====== Сделать фото ======
 function takePhoto(){
     const video=document.getElementById('video');
     const canvas=document.createElement('canvas');
-    canvas.width=video.videoWidth;canvas.height=video.videoHeight;
+    canvas.width=video.videoWidth; canvas.height=video.videoHeight;
     const ctx=canvas.getContext('2d');
     ctx.drawImage(video,0,0,canvas.width,canvas.height);
     const dataUrl=canvas.toDataURL('image/jpeg',0.9);
@@ -175,34 +129,25 @@ function takePhoto(){
     goToStep(3);
 }
 
-// ====== Отображение фото ======
 function renderPhotos(){
     const list=document.getElementById('photoList');
     list.innerHTML='';
-    photos.forEach((p,i)=>{
+    photos.forEach(p=>{
         const img=document.createElement('img');
         img.src=p;
         list.appendChild(img);
     });
 }
 
-// ====== Отправка фото ======
-async function sendPhotos(){
-    const name=document.getElementById('userName').value||'Гость';
-    const comment=document.getElementById('comment').value||'';
-    showMsg('Отправка фото...');
-    const loader=document.getElementById('loader');loader.style.display='block';
-    try{
-        for(const p of photos){
-            await fetch(GOOGLE_SCRIPT_URL,{method:'POST',body:JSON.stringify({photo:p,name:name,comment:comment}),headers:{'Content-Type':'application/json'}});
-        }
-        loader.style.display='none';
-        photos=[];renderPhotos();
-        goToStep(4);
-    }catch(e){
-        console.error(e);loader.style.display='none';
-        showMsg('Ошибка отправки','error');
-    }
+function downloadPhotos(){
+    if(photos.length===0){showMsg('Нет фото для скачивания','error'); return;}
+    photos.forEach((p,i)=>{
+        const a=document.createElement('a');
+        a.href=p;
+        a.download=`photo_${i+1}.jpg`;
+        a.click();
+    });
+    showMsg('Фото загружены!');
 }
 </script>
 </body>
