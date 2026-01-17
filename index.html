@@ -1,552 +1,104 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Фото для свадьбы</title>
-    <style>
-        /* ОЧЕНЬ ПРОСТЫЕ СТИЛИ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f9f0;
-            min-height: 100vh;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        
-        h1 {
-            color: #2E7D32;
-            margin: 20px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .step {
-            display: none;
-        }
-        
-        .step.active {
-            display: block;
-            animation: fadeIn 0.5s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        /* КАМЕРА */
-        #videoContainer {
-            width: 100%;
-            max-width: 400px;
-            margin: 20px auto;
-            border-radius: 15px;
-            overflow: hidden;
-            background: black;
-        }
-        
-        video {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        
-        /* ПРЕВЬЮ */
-        canvas {
-            width: 100%;
-            max-width: 400px;
-            margin: 20px auto;
-            display: block;
-            border-radius: 15px;
-        }
-        
-        /* КНОПКИ */
-        .btn {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 18px;
-            border-radius: 50px;
-            margin: 10px;
-            cursor: pointer;
-            width: 90%;
-            max-width: 300px;
-            transition: all 0.3s;
-        }
-        
-        .btn:hover {
-            background: #388E3C;
-            transform: translateY(-2px);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
-        .btn:disabled {
-            background: #cccccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .btn-red {
-            background: #f44336;
-        }
-        
-        .btn-blue {
-            background: #2196F3;
-        }
-        
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        
-        /* ПОЛЯ ВВОДА */
-        input, textarea {
-            width: 90%;
-            max-width: 300px;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-        }
-        
-        /* УВЕДОМЛЕНИЯ */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #4CAF50;
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            display: none;
-            z-index: 1000;
-            font-weight: bold;
-            animation: slideIn 0.3s;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-        }
-        
-        .notification.error {
-            background: #f44336;
-        }
-        
-        /* КНОПКИ КАМЕРЫ */
-        .camera-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        
-        .cam-btn {
-            background: #666;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .cam-btn:hover {
-            transform: translateY(-2px);
-        }
-        
-        .cam-btn.active {
-            background: #4CAF50;
-        }
-        
-        /* УСПЕХ */
-        .success {
-            font-size: 80px;
-            color: #4CAF50;
-            margin: 30px 0;
-            animation: bounce 1s;
-        }
-        
-        @keyframes bounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-        
-        .tip {
-            background: #FFF9C4;
-            border: 2px dashed #FFD600;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            color: #5D4037;
-            animation: pulse 3s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.9; }
-        }
-        
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4CAF50;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-            display: none;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Фото для свадьбы</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial;background:#f0f9f0;min-height:100vh;padding:20px;text-align:center}
+.container{max-width:500px;margin:0 auto;background:#fff;border-radius:20px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.1)}
+h1{color:#2E7D32;margin:20px 0}
+.step{display:none}
+.step.active{display:block}
+#videoContainer{max-width:400px;margin:20px auto;border-radius:15px;overflow:hidden;background:#000}
+video,canvas{width:100%;border-radius:15px}
+.btn{background:#4CAF50;color:#fff;border:none;padding:15px 30px;font-size:18px;border-radius:50px;margin:10px;width:90%;max-width:300px}
+.btn-red{background:#f44336}
+.btn-blue{background:#2196F3}
+input,textarea{width:90%;max-width:300px;padding:12px;margin:10px;border-radius:10px;border:2px solid #ddd}
+.loader{border:4px solid #f3f3f3;border-top:4px solid #4CAF50;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:20px auto;display:none}
+@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <!-- ШАГ 1: СТАРТ -->
-        <div id="step1" class="step active">
-            <h1>📸 Фото на память</h1>
-            <p>Сделайте фото для нашего свадебного альбома</p>
-            
-            <div class="tip">
-                💡 Можно сделать несколько фото - все автоматически сохранятся!
-            </div>
-            
-            <button class="btn" onclick="startCamera()">
-                Начать фотографировать
-            </button>
-        </div>
-        
-        <!-- ШАГ 2: КАМЕРА -->
-        <div id="step2" class="step">
-            <h1>👁️ Сфотографируйте</h1>
-            
-            <div class="camera-buttons">
-                <button class="cam-btn active" onclick="switchCamera('back')">
-                    📷 Задняя камера
-                </button>
-                <button class="cam-btn" onclick="switchCamera('front')">
-                    🤳 Селфи-камера
-                </button>
-            </div>
-            
-            <div id="videoContainer">
-                <video id="video" autoplay playsinline></video>
-            </div>
-            
-            <div class="btn-group">
-                <button class="btn" onclick="takePhoto()">
-                    📸 Сделать фото
-                </button>
-                <button class="btn btn-blue" onclick="goToStep(1)">
-                    ← Назад
-                </button>
-            </div>
-        </div>
-        
-        <!-- ШАГ 3: ПРОВЕРКА -->
-        <div id="step3" class="step">
-            <h1>👀 Проверьте фото</h1>
-            
-            <canvas id="canvas"></canvas>
-            
-            <input type="text" id="userName" placeholder="Ваше имя (необязательно)">
-            <textarea id="comment" placeholder="Комментарий (необязательно)" rows="2"></textarea>
-            
-            <div class="btn-group">
-                <button class="btn" onclick="sendPhoto()" id="uploadBtn">
-                    📤 Отправить фото
-                </button>
-                <button class="btn btn-red" onclick="goToStep(2)">
-                    🔄 Переснять
-                </button>
-            </div>
-            
-            <div class="loader" id="loader"></div>
-        </div>
-        
-        <!-- ШАГ 4: УСПЕХ -->
-        <div id="step4" class="step">
-            <div class="success">✅</div>
-            <h1>Фото отправлено!</h1>
-            <p>Спасибо! Фото автоматически сохранено в альбом</p>
-            
-            <div class="tip">
-                💫 Хотите сделать еще одно фото?
-            </div>
-            
-            <button class="btn" onclick="goToStep(1)">
-                📸 Сделать еще фото
-            </button>
-        </div>
-    </div>
-    
-    <!-- Уведомление -->
-    <div id="notification" class="notification"></div>
+<div class="container">
+
+<div id="step1" class="step active">
+<h1>📸 Фото на память</h1>
+<button class="btn" onclick="startCamera()">Начать</button>
+</div>
+
+<div id="step2" class="step">
+<div id="videoContainer">
+<video id="video" autoplay playsinline></video>
+</div>
+<button class="btn" onclick="takePhoto()">📸 Сделать фото</button>
+<button class="btn btn-blue" onclick="goToStep(1)">← Назад</button>
+</div>
+
+<div id="step3" class="step">
+<canvas id="canvas"></canvas>
+<input id="userName" placeholder="Ваше имя">
+<textarea id="comment" placeholder="Комментарий"></textarea>
+<button class="btn" onclick="sendPhoto()" id="uploadBtn">📤 Отправить</button>
+<button class="btn btn-red" onclick="goToStep(2)">🔄 Переснять</button>
+<div class="loader" id="loader"></div>
+</div>
+
+<div id="step4" class="step">
+<h1>✅ Фото отправлено!</h1>
+<button class="btn" onclick="goToStep(1)">Еще фото</button>
+</div>
+
+</div>
 
 <script>
-// =========== КОНФИГУРАЦИЯ ===========
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFInmV1fscK5TWXZhiYiOdgcdd0V6G-YXCwpEO7GDBZnjDyxaPAL8tfeMGqG-jKLRK/exec";
 
-// =========== ПЕРЕМЕННЫЕ ===========
-let currentStep = 1;
-let videoStream = null;
-let currentCamera = 'back'; // 'front' или 'back'
-let photoData = null;
+let stream = null;
 
-// =========== ПОКАЗАТЬ УВЕДОМЛЕНИЕ ===========
-function showMsg(text, type = 'success') {
-    const msg = document.getElementById('notification');
-    msg.textContent = text;
-    msg.style.background = type === 'error' ? '#f44336' : '#4CAF50';
-    msg.style.display = 'block';
-    
-    setTimeout(() => {
-        msg.style.display = 'none';
-    }, 3000);
+function goToStep(n){
+document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+document.getElementById('step'+n).classList.add('active');
+if(n!==2 && stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
 }
 
-// =========== ПОКАЗАТЬ ЗАГРУЗКУ ===========
-function showLoader(show) {
-    const loader = document.getElementById('loader');
-    const btn = document.getElementById('uploadBtn');
-    
-    if (show) {
-        loader.style.display = 'block';
-        btn.disabled = true;
-        btn.innerHTML = '⏳ Отправляем...';
-    } else {
-        loader.style.display = 'none';
-        btn.disabled = false;
-        btn.innerHTML = '📤 Отправить фото';
-    }
+async function startCamera(){
+stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+video.srcObject = stream;
+goToStep(2);
 }
 
-// =========== ПЕРЕКЛЮЧЕНИЕ ШАГОВ ===========
-function goToStep(step) {
-    // Скрываем все шаги
-    document.querySelectorAll('.step').forEach(stepEl => {
-        stepEl.classList.remove('active');
-    });
-    
-    // Показываем нужный шаг
-    document.getElementById(`step${step}`).classList.add('active');
-    currentStep = step;
-    
-    // Если уходим с камеры - выключаем её
-    if (step !== 2 && videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-        videoStream = null;
-    }
+function takePhoto(){
+canvas.width = video.videoWidth;
+canvas.height = video.videoHeight;
+canvas.getContext('2d').drawImage(video,0,0);
+goToStep(3);
 }
 
-// =========== ВЫБОР КАМЕРЫ ===========
-function switchCamera(type) {
-    currentCamera = type;
-    
-    // Подсвечиваем активную кнопку
-    document.querySelectorAll('.cam-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    if (type === 'front') {
-        document.querySelector('.cam-btn:nth-child(2)').classList.add('active');
-    } else {
-        document.querySelector('.cam-btn:nth-child(1)').classList.add('active');
-    }
-    
-    // Перезапускаем камеру
-    if (videoStream) {
-        startCamera();
-    }
+async function sendPhoto(){
+document.getElementById('loader').style.display='block';
+uploadBtn.disabled=true;
+
+const formData = new FormData();
+formData.append('photo', canvas.toDataURL('image/jpeg',0.9));
+formData.append('name', userName.value || 'Гость');
+formData.append('comment', comment.value || '');
+
+await fetch(GOOGLE_SCRIPT_URL,{
+method:'POST',
+body:formData
+});
+
+document.getElementById('loader').style.display='none';
+uploadBtn.disabled=false;
+userName.value='';
+comment.value='';
+goToStep(4);
 }
-
-// =========== ЗАПУСК КАМЕРЫ ===========
-async function startCamera() {
-    try {
-        // Выключаем старую камеру
-        if (videoStream) {
-            videoStream.getTracks().forEach(track => track.stop());
-        }
-        
-        // Настройки камеры
-        const constraints = {
-            video: {
-                facingMode: currentCamera === 'front' ? 'user' : 'environment',
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-            },
-            audio: false
-        };
-        
-        // Запускаем камеру
-        videoStream = await navigator.mediaDevices.getUserMedia(constraints);
-        const video = document.getElementById('video');
-        video.srcObject = videoStream;
-        
-        // Исправляем отображение
-        if (currentCamera === 'front') {
-            video.style.transform = 'scaleX(-1)'; // Зеркально для селфи
-        } else {
-            video.style.transform = 'scaleX(1)'; // Нормально для задней
-        }
-        
-        goToStep(2);
-        
-    } catch (error) {
-        console.error('Ошибка камеры:', error);
-        showMsg('Не удалось включить камеру. Разрешите доступ в настройках браузера.', 'error');
-        goToStep(1);
-    }
-}
-
-// =========== СДЕЛАТЬ ФОТО ===========
-function takePhoto() {
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    // Устанавливаем размеры
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    // Рисуем фото (с правильным отображением)
-    if (currentCamera === 'front') {
-        // Для селфи-камеры делаем зеркальное отображение
-        ctx.translate(canvas.width, 0);
-        ctx.scale(-1, 1);
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    } else {
-        // Для задней камеры - нормально
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    }
-    
-    // Сохраняем данные фото
-    photoData = canvas.toDataURL('image/jpeg', 0.9);
-    
-    goToStep(3);
-}
-
-// =========== ОТПРАВИТЬ ФОТО - АВТОМАТИЧЕСКИ В GOOGLE ДИСК ===========
-async function sendPhoto() {
-    const userName = document.getElementById('userName').value || 'Гость';
-    const comment = document.getElementById('comment').value || '';
-    
-    // Показываем загрузку
-    showLoader(true);
-    showMsg('Сохраняем фото в свадебный альбом...');
-    
-    try {
-        // Получаем фото с canvas
-        const canvas = document.getElementById('canvas');
-        const photoData = canvas.toDataURL('image/jpeg', 0.9);
-        
-        // Подготавливаем данные для отправки
-        const data = {
-            photo: photoData,
-            name: userName,
-            comment: comment,
-            timestamp: new Date().toISOString()
-        };
-        
-        // Отправляем на Google Apps Script
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        // Пробуем получить ответ (может быть CORS ошибка)
-        let result;
-        try {
-            result = await response.json();
-        } catch (e) {
-            // Если CORS ошибка, считаем что отправка успешна
-            result = { success: true, message: 'Фото отправлено (CORS)' };
-        }
-        
-        if (result.success) {
-            // УСПЕШНАЯ ОТПРАВКА
-            showLoader(false);
-            showMsg('✅ Фото сохранено в свадебный альбом!');
-            
-            // Очищаем форму
-            document.getElementById('userName').value = '';
-            document.getElementById('comment').value = '';
-            
-            // Переходим к успеху
-            setTimeout(() => {
-                goToStep(4);
-            }, 1500);
-            
-        } else {
-            // ОШИБКА ОТ СЕРВЕРА
-            throw new Error(result.error || 'Ошибка сервера');
-        }
-        
-    } catch (error) {
-        console.error('Ошибка отправки:', error);
-        showLoader(false);
-        
-        // Показываем пользователю что всё ок (даже при ошибке)
-        showMsg('✅ Фото добавлено в свадебный альбом!');
-        
-        // Очищаем форму
-        document.getElementById('userName').value = '';
-        document.getElementById('comment').value = '';
-        
-        // Переходим к успеху
-        setTimeout(() => {
-            goToStep(4);
-        }, 1500);
-    }
-}
-
-// =========== ПРОВЕРКА БРАУЗЕРА ===========
-window.onload = function() {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showMsg('Ваш браузер не поддерживает камеру. Используйте Chrome или Safari.', 'error');
-    }
-};
-
-// Автоматическое напоминание о повторной съемке
-setInterval(() => {
-    if (currentStep === 4) {
-        setTimeout(() => {
-            showMsg('Хотите сделать еще одно фото?', 'success', 4000);
-        }, 3000);
-    }
-}, 10000);
 </script>
 </body>
 </html>
