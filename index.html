@@ -1,155 +1,845 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Свадебная фотокабина</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-body {
-    font-family: 'Montserrat', sans-serif;
-    /* Фон с твоим фото с GitHub, заменяй ссылку */
-    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('3.jpg') center/cover no-repeat;
-    color: #fff;
-    text-align: center;
-    min-height: 100vh;
-    padding: 20px;
-}
-.container {
-    max-width: 500px;
-    margin: 0 auto;
-    background: rgba(0,0,0,0.5);
-    padding: 20px;
-    border-radius: 20px;
-}
-h1 {
-    font-family: 'Playfair Display', serif;
-    margin-bottom: 10px;
-}
-p { margin-bottom: 20px; }
-.step { display: none; }
-.step.active { display: block; animation: fadeIn 0.5s; }
-@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-video, canvas { width: 100%; border-radius: 15px; margin-bottom: 15px; }
-.btn {
-    background: #D4AF37; color: #000; border: none;
-    padding: 15px 30px; border-radius: 50px; margin: 10px;
-    font-size: 18px; cursor: pointer; transition: 0.3s;
-}
-.btn:hover { transform: translateY(-3px); }
-.btn-red { background:#f44336;color:#fff; }
-.loader {
-    border: 4px solid #f3f3f3; border-top: 4px solid #D4AF37;
-    border-radius: 50%; width: 40px; height: 40px;
-    animation: spin 1s linear infinite; margin: 20px auto; display: none;
-}
-@keyframes spin { 0%{transform:rotate(0deg);}100%{transform:rotate(360deg);} }
-.notification {
-    position: fixed; top: 20px; right: 20px;
-    background: #D4AF37; color: #000; padding: 15px; border-radius: 10px;
-    display: none; font-weight: bold;
-}
-.notification.error { background:#f44336;color:#fff; }
-.photo-list img { width:100%; border-radius:15px; margin-bottom:10px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Свадебная фотокабина</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F4E4A6;
+            --dark: #1a1a1a;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('3.jpg') center/cover no-repeat fixed;
+            color: var(--white);
+            text-align: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(26, 26, 26, 0.9);
+            padding: 30px 25px;
+            border-radius: 25px;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--gold);
+        }
+        
+        h1 {
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 15px;
+            color: var(--gold);
+            font-size: 2.2rem;
+            text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            color: var(--gold-light);
+            line-height: 1.5;
+        }
+        
+        .step {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .step.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* КАМЕРА */
+        .camera-wrapper {
+            position: relative;
+            width: 100%;
+            margin: 25px auto;
+            border-radius: 20px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 0 0 3px var(--gold);
+        }
+        
+        video, canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 20px;
+        }
+        
+        .camera-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .camera-btn {
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--gold-light);
+            border: 2px solid var(--gold);
+            padding: 12px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .camera-btn:hover {
+            background: var(--gold);
+            color: var(--dark);
+            transform: translateY(-2px);
+        }
+        
+        .camera-btn.active {
+            background: var(--gold);
+            color: var(--dark);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        }
+        
+        /* КНОПКИ */
+        .btn {
+            background: linear-gradient(135deg, var(--gold) 0%, #B8941F 100%);
+            color: var(--dark);
+            border: none;
+            padding: 18px 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            margin: 15px 0;
+            cursor: pointer;
+            width: 100%;
+            max-width: 350px;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(212, 175, 55, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border: 2px solid var(--gold);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336 0%, #b71c1c 100%);
+            color: var(--white);
+        }
+        
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        /* ФОТО ГАЛЕРЕЯ */
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .photo-item {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+        
+        .photo-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .photo-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .remove-photo {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        /* ПОЛЯ ВВОДА */
+        input, textarea {
+            width: 100%;
+            max-width: 350px;
+            padding: 16px 20px;
+            margin: 12px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 15px;
+            color: var(--white);
+            font-size: 1rem;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+        }
+        
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        /* УВЕДОМЛЕНИЯ */
+        .notification {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            background: var(--gold);
+            color: var(--dark);
+            padding: 18px 22px;
+            border-radius: 12px;
+            display: none;
+            z-index: 1000;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+            animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            max-width: 320px;
+            border-left: 5px solid #B8941F;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%) scale(0.8); opacity: 0; }
+            to { transform: translateX(0) scale(1); opacity: 1; }
+        }
+        
+        .notification.error {
+            background: #f44336;
+            color: var(--white);
+            border-left-color: #b71c1c;
+        }
+        
+        .notification.success {
+            background: #4CAF50;
+            color: var(--white);
+            border-left-color: #2E7D32;
+        }
+        
+        /* ЗАГРУЗЧИК */
+        .loader {
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid var(--gold);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* УСПЕХ */
+        .success-icon {
+            font-size: 90px;
+            color: var(--gold);
+            margin: 30px 0;
+            animation: bounceIn 1s;
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+        
+        .tip-box {
+            background: rgba(212, 175, 55, 0.1);
+            border: 2px dashed var(--gold);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 25px 0;
+            color: var(--gold-light);
+            animation: gentlePulse 3s infinite;
+        }
+        
+        @keyframes gentlePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* СЧЕТЧИК ФОТО */
+        .photo-counter {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(212, 175, 55, 0.9);
+            color: var(--dark);
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* КАМЕРА ВИДЕО */
+        .video-mirror {
+            transform: scaleX(-1);
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .btn {
+                padding: 16px 25px;
+                font-size: 1rem;
+            }
+            
+            .camera-btn {
+                padding: 10px 18px;
+                font-size: 0.9rem;
+            }
+            
+            .photo-gallery {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .photo-item img {
+                height: 120px;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<div class="container">
-
-<!-- ШАГ 1 -->
-<div id="step1" class="step active">
-<h1>📸 Добро пожаловать!</h1>
-<p>Сделайте фото на память нашего свадебного дня ❤️</p>
-<p>Вы можете сделать несколько фото, они будут отображаться ниже.</p>
-<button class="btn" onclick="startCamera()">Начать фотографировать</button>
-</div>
-
-<!-- ШАГ 2 -->
-<div id="step2" class="step">
-<h1>👁️ Сфотографируйте</h1>
-<video id="video" autoplay playsinline></video>
-<div>
-<button class="btn" onclick="takePhoto()">📸 Сделать фото</button>
-<button class="btn btn-red" onclick="goToStep(1)">← Назад</button>
-</div>
-</div>
-
-<!-- ШАГ 3 -->
-<div id="step3" class="step">
-<h1>👀 Ваши фото</h1>
-<div class="photo-list" id="photoList"></div>
-<input type="text" id="userName" placeholder="Ваше имя (необязательно)">
-<textarea id="comment" placeholder="Комментарий (необязательно)" rows="2"></textarea>
-<div>
-<button class="btn" onclick="downloadPhotos()">💾 Скачать фото</button>
-<button class="btn btn-red" onclick="goToStep(2)">🔄 Сделать ещё фото</button>
-</div>
-</div>
-
-</div>
-<div id="notification" class="notification"></div>
+    <div class="container">
+        <!-- ШАГ 1: ПРИВЕТСТВИЕ -->
+        <div id="step1" class="step active">
+            <h1><i class="fas fa-camera-retro"></i> Свадебная фотокабина</h1>
+            <p class="subtitle">Создайте незабываемые моменты нашего праздника!</p>
+            
+            <div class="tip-box">
+                <i class="fas fa-lightbulb"></i>
+                <p>Сделайте несколько фото, затем отправьте их все сразу в наш свадебный альбом!</p>
+            </div>
+            
+            <button class="btn" onclick="startCamera()">
+                <i class="fas fa-camera"></i>
+                <span>Начать фотографировать</span>
+            </button>
+        </div>
+        
+        <!-- ШАГ 2: КАМЕРА -->
+        <div id="step2" class="step">
+            <h1><i class="fas fa-video"></i> Сфотографируйте момент</h1>
+            <p class="subtitle">Выберите камеру и сделайте фото</p>
+            
+            <div class="camera-controls">
+                <button class="camera-btn active" onclick="switchCamera('back')">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Задняя камера</span>
+                </button>
+                <button class="camera-btn" onclick="switchCamera('front')">
+                    <i class="fas fa-user"></i>
+                    <span>Селфи-камера</span>
+                </button>
+            </div>
+            
+            <div class="camera-wrapper">
+                <video id="video" autoplay playsinline></video>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn" onclick="takePhoto()">
+                    <i class="fas fa-camera-retro"></i>
+                    <span>Сделать фото</span>
+                </button>
+                <button class="btn btn-secondary" onclick="goToStep(1)">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Назад</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- ШАГ 3: ГАЛЕРЕЯ -->
+        <div id="step3" class="step">
+            <h1><i class="fas fa-images"></i> Ваши фото</h1>
+            <p class="subtitle">Добавьте информацию и отправьте в альбом</p>
+            
+            <div class="photo-gallery" id="photoGallery">
+                <!-- Фото будут добавляться сюда -->
+            </div>
+            
+            <div>
+                <input type="text" id="userName" placeholder="Ваше имя (необязательно)">
+                <textarea id="comment" placeholder="Комментарий к фото (необязательно)" rows="3"></textarea>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn" onclick="openGoogleForm()" id="sendBtn">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Отправить фото в альбом</span>
+                </button>
+                <button class="btn btn-secondary" onclick="goToStep(2)">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Сделать ещё фото</span>
+                </button>
+                <button class="btn btn-danger" onclick="clearPhotos()">
+                    <i class="fas fa-trash"></i>
+                    <span>Очистить все фото</span>
+                </button>
+            </div>
+            
+            <div class="loader" id="loader"></div>
+        </div>
+        
+        <!-- ШАГ 4: УСПЕХ -->
+        <div id="step4" class="step">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1>Фото отправлены!</h1>
+            <p class="subtitle">Спасибо! Ваши фото сохранены в свадебном альбоме</p>
+            
+            <div class="tip-box">
+                <i class="fas fa-smile"></i>
+                <p>Хотите сделать ещё фото? Можно вернуться и добавить больше!</p>
+            </div>
+            
+            <button class="btn" onclick="goToStep(1)">
+                <i class="fas fa-redo"></i>
+                <span>Сделать ещё фото</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Уведомление -->
+    <div id="notification" class="notification"></div>
+    
+    <!-- Счетчик фото -->
+    <div class="photo-counter" id="photoCounter" style="display: none;">
+        <i class="fas fa-camera"></i>
+        <span>Фото: <span id="photoCount">0</span></span>
+    </div>
 
 <script>
-let currentStep=1, videoStream=null, photos=[];
+// =========== КОНСТАНТЫ ===========
+const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSe6hWt8eu_0qSCi94L7T8GFMluMptkKHRng4Eu4mhapmqAVRA/viewform";
 
-function showMsg(text,type='success'){
-    const msg=document.getElementById('notification');
-    msg.textContent=text;
-    msg.className='notification'+(type==='error'? ' error':'');
-    msg.style.display='block';
-    setTimeout(()=>{msg.style.display='none';},3000);
+// =========== ПЕРЕМЕННЫЕ ===========
+let currentStep = 1;
+let videoStream = null;
+let currentCamera = 'back'; // 'front' или 'back'
+let photos = []; // Массив для хранения фото
+
+// =========== УТИЛИТЫ ===========
+function showNotification(message, type = 'success', duration = 5000) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.className = `notification ${type}`;
+    notification.style.display = 'block';
+    
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, duration);
 }
 
-function goToStep(step){
-    document.querySelectorAll('.step').forEach(el=>el.classList.remove('active'));
-    document.getElementById(`step${step}`).classList.add('active');
-    currentStep=step;
-    if(step!==2 && videoStream){videoStream.getTracks().forEach(t=>t.stop());videoStream=null;}
+function showLoader(show) {
+    const loader = document.getElementById('loader');
+    const sendBtn = document.getElementById('sendBtn');
+    
+    if (show) {
+        loader.style.display = 'block';
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Подготавливаем...</span>';
+    } else {
+        loader.style.display = 'none';
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Отправить фото в альбом</span>';
+    }
 }
 
-async function startCamera(){
-    try{
-        if(videoStream){videoStream.getTracks().forEach(t=>t.stop());}
-        videoStream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720}},audio:false});
-        document.getElementById('video').srcObject=videoStream;
+function updatePhotoCounter() {
+    const counter = document.getElementById('photoCounter');
+    const countSpan = document.getElementById('photoCount');
+    
+    if (photos.length > 0) {
+        countSpan.textContent = photos.length;
+        counter.style.display = 'flex';
+    } else {
+        counter.style.display = 'none';
+    }
+}
+
+// =========== УПРАВЛЕНИЕ ШАГАМИ ===========
+function goToStep(step) {
+    // Скрываем все шаги
+    document.querySelectorAll('.step').forEach(stepEl => {
+        stepEl.classList.remove('active');
+    });
+    
+    // Показываем нужный шаг
+    const targetStep = document.getElementById(`step${step}`);
+    if (targetStep) {
+        targetStep.classList.add('active');
+        currentStep = step;
+    }
+    
+    // Останавливаем камеру если уходим со 2 шага
+    if (step !== 2 && videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+    }
+}
+
+// =========== КАМЕРА ===========
+function switchCamera(type) {
+    currentCamera = type;
+    
+    // Обновляем активные кнопки
+    document.querySelectorAll('.camera-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    if (type === 'front') {
+        document.querySelector('.camera-btn:nth-child(2)').classList.add('active');
+    } else {
+        document.querySelector('.camera-btn:nth-child(1)').classList.add('active');
+    }
+    
+    // Перезапускаем камеру если она активна
+    if (videoStream) {
+        startCamera();
+    }
+}
+
+async function startCamera() {
+    try {
+        // Останавливаем предыдущий поток
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+        }
+        
+        // Показываем уведомление
+        showNotification('Запускаем камеру...', 'success', 2000);
+        
+        // Настройки камеры
+        const constraints = {
+            video: {
+                facingMode: currentCamera === 'front' ? 'user' : 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                frameRate: { ideal: 30 }
+            },
+            audio: false
+        };
+        
+        // Получаем доступ к камере
+        videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const video = document.getElementById('video');
+        video.srcObject = videoStream;
+        
+        // Корректируем отображение для селфи-камеры
+        if (currentCamera === 'front') {
+            video.classList.add('video-mirror');
+        } else {
+            video.classList.remove('video-mirror');
+        }
+        
+        // Переходим ко 2 шагу
         goToStep(2);
-    }catch(e){console.error(e);showMsg('Не удалось включить камеру','error');goToStep(1);}
+        
+    } catch (error) {
+        console.error('Ошибка камеры:', error);
+        
+        let errorMessage = 'Не удалось получить доступ к камере. ';
+        
+        if (error.name === 'NotAllowedError') {
+            errorMessage += 'Разрешите доступ к камере в настройках браузера.';
+        } else if (error.name === 'NotFoundError') {
+            errorMessage += 'Камера не найдена.';
+        } else {
+            errorMessage += 'Попробуйте обновить страницу.';
+        }
+        
+        showNotification(errorMessage, 'error', 8000);
+        goToStep(1);
+    }
 }
 
-function takePhoto(){
-    const video=document.getElementById('video');
-    const canvas=document.createElement('canvas');
-    canvas.width=video.videoWidth; canvas.height=video.videoHeight;
-    const ctx=canvas.getContext('2d');
-    ctx.drawImage(video,0,0,canvas.width,canvas.height);
-    const dataUrl=canvas.toDataURL('image/jpeg',0.9);
-    photos.push(dataUrl);
-    renderPhotos();
-    goToStep(3);
+// =========== СЪЕМКА ФОТО ===========
+function takePhoto() {
+    const video = document.getElementById('video');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Устанавливаем размеры canvas
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Рисуем фото с правильной ориентацией
+    if (currentCamera === 'front') {
+        // Для селфи-камеры: зеркальное отображение
+        ctx.save();
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+    } else {
+        // Для задней камеры: нормально
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
+    
+    // Сохраняем фото в массив
+    const photoData = canvas.toDataURL('image/jpeg', 0.9);
+    photos.push(photoData);
+    
+    // Обновляем галерею и счетчик
+    renderPhotoGallery();
+    updatePhotoCounter();
+    
+    // Показываем уведомление
+    showNotification('Фото добавлено!', 'success');
 }
 
-function renderPhotos(){
-    const list=document.getElementById('photoList');
-    list.innerHTML='';
-    photos.forEach(p=>{
-        const img=document.createElement('img');
-        img.src=p;
-        list.appendChild(img);
+// =========== ОТОБРАЖЕНИЕ ГАЛЕРЕИ ===========
+function renderPhotoGallery() {
+    const gallery = document.getElementById('photoGallery');
+    gallery.innerHTML = '';
+    
+    photos.forEach((photoData, index) => {
+        const photoItem = document.createElement('div');
+        photoItem.className = 'photo-item';
+        
+        const img = document.createElement('img');
+        img.src = photoData;
+        img.alt = `Фото ${index + 1}`;
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-photo';
+        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        removeBtn.onclick = () => removePhoto(index);
+        
+        photoItem.appendChild(img);
+        photoItem.appendChild(removeBtn);
+        gallery.appendChild(photoItem);
     });
 }
 
-function downloadPhotos(){
-    if(photos.length===0){showMsg('Нет фото для скачивания','error'); return;}
-    photos.forEach((p,i)=>{
-        const a=document.createElement('a');
-        a.href=p;
-        a.download=`photo_${i+1}.jpg`;
-        a.click();
-    });
-    showMsg('Фото загружены!');
+function removePhoto(index) {
+    photos.splice(index, 1);
+    renderPhotoGallery();
+    updatePhotoCounter();
+    showNotification('Фото удалено', 'success');
 }
+
+function clearPhotos() {
+    if (photos.length === 0) {
+        showNotification('Нет фото для удаления', 'error');
+        return;
+    }
+    
+    if (confirm(`Удалить все ${photos.length} фото?`)) {
+        photos = [];
+        renderPhotoGallery();
+        updatePhotoCounter();
+        showNotification('Все фото удалены', 'success');
+    }
+}
+
+// =========== ОТКРЫТИЕ GOOGLE ФОРМЫ ===========
+async function openGoogleForm() {
+    if (photos.length === 0) {
+        showNotification('Сначала сделайте хотя бы одно фото!', 'error');
+        return;
+    }
+    
+    const userName = document.getElementById('userName').value.trim() || 'Гость';
+    const comment = document.getElementById('comment').value.trim() || '';
+    
+    showLoader(true);
+    showNotification('Подготавливаем ваши фото...', 'success');
+    
+    try {
+        // 1. Создаем ZIP архив со всеми фото
+        const zipFileName = `свадебные_фото_${userName}_${Date.now()}.zip`;
+        
+        // 2. Скачиваем все фото на телефон пользователя
+        photos.forEach((photoData, index) => {
+            const downloadLink = document.createElement('a');
+            downloadLink.href = photoData;
+            downloadLink.download = `свадьба_${userName}_${index + 1}.jpg`;
+            downloadLink.click();
+        });
+        
+        // 3. Показываем инструкцию и открываем Google Форму
+        setTimeout(() => {
+            showLoader(false);
+            
+            const instructions = `
+🎉 Ваши ${photos.length} фото скачаны на телефон!
+
+📤 Теперь отправьте их в наш свадебный альбом:
+
+1. Нажмите "ПЕРЕЙТИ К ФОРМЕ" ниже
+2. В открывшейся Google Форме:
+   • Нажмите "Добавить файл" или значок 📎
+   • Выберите все скачанные фото
+   • Заполните ваше имя и комментарий
+   • Нажмите "ОТПРАВИТЬ"
+
+✅ Все фото автоматически сохранятся в свадебном альбоме!
+
+📁 Файлы ищите в папке "Загрузки" на телефоне.
+            `;
+            
+            if (confirm(instructions)) {
+                // Открываем Google Форму в новом окне
+                window.open(GOOGLE_FORM_URL, '_blank', 'noopener,noreferrer');
+                
+                // Показываем дополнительное сообщение
+                setTimeout(() => {
+                    showNotification('Форма открыта! Загрузите фото и нажмите "Отправить"', 'success');
+                }, 1000);
+            }
+            
+            // Переходим к шагу успеха
+            goToStep(4);
+            
+            // Очищаем форму
+            document.getElementById('userName').value = '';
+            document.getElementById('comment').value = '';
+            
+            // Автоматическое предложение сделать еще фото
+            setTimeout(() => {
+                showNotification('Можете сделать еще фото!', 'success', 4000);
+            }, 3000);
+            
+        }, 1500);
+        
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showLoader(false);
+        
+        // Резервный вариант: просто открываем форму
+        showNotification('Открываем форму для загрузки фото...', 'error');
+        
+        setTimeout(() => {
+            window.open(GOOGLE_FORM_URL, '_blank');
+            goToStep(4);
+        }, 1000);
+    }
+}
+
+// =========== ИНИЦИАЛИЗАЦИЯ ===========
+document.addEventListener('DOMContentLoaded', () => {
+    // Проверка поддержки камеры
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        const startBtn = document.querySelector('#step1 .btn');
+        if (startBtn) {
+            startBtn.disabled = true;
+            startBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Камера не поддерживается</span>';
+            startBtn.style.background = '#666';
+        }
+        showNotification('Используйте Chrome или Safari на телефоне', 'error', 10000);
+    }
+    
+    // Восстанавливаем фото из localStorage (если есть)
+    const savedPhotos = localStorage.getItem('weddingPhotos');
+    if (savedPhotos) {
+        photos = JSON.parse(savedPhotos);
+        if (photos.length > 0) {
+            renderPhotoGallery();
+            updatePhotoCounter();
+        }
+    }
+});
+
+// Сохраняем фото в localStorage при закрытии
+window.addEventListener('beforeunload', () => {
+    localStorage.setItem('weddingPhotos', JSON.stringify(photos));
+    
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+    }
+});
+
+// Автоочистка при закрытии
+setInterval(() => {
+    if (currentStep === 4) {
+        // Автоматически очищаем фото через 30 секунд после отправки
+        setTimeout(() => {
+            photos = [];
+            localStorage.removeItem('weddingPhotos');
+            updatePhotoCounter();
+        }, 30000);
+    }
+}, 1000);
 </script>
 </body>
 </html>
-
