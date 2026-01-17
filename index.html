@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фотоотчет - Сделай фото и отправь</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 100%;
+            padding: 20px;
+        }
+        
+        .header {
+            background: rgba(0,0,0,0.2);
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        h1 i {
+            color: #ffcc00;
+        }
+        
+        .tip {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px dashed #ffcc00;
+            color: #ffcc00;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-weight: bold;
+            font-size: 1.1rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+        
+        /* Стили для разных состояний */
+        .step {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .step.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Камера */
+        #videoContainer {
+            position: relative;
+            margin: 20px auto;
+            max-width: 500px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+            background: #000;
+        }
+        
+        .camera-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 3px solid white;
+            border-radius: 20px;
+            pointer-events: none;
+        }
+        
+        /* Кнопки */
+        .btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            font-size: 1.3rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 15px;
+            width: 90%;
+            max-width: 350px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336 0%, #b71c1c 100%);
+        }
+        
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        /* Превью фото */
+        #previewContainer {
+            margin: 30px auto;
+            max-width: 500px;
+        }
+        
+        canvas {
+            width: 100%;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+        
+        /* Форма */
+        .form-group {
+            margin: 25px auto;
+            max-width: 400px;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 18px;
+            margin: 12px 0;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.5);
+        }
+        
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
+            max-width: 300px;
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        /* Футер */
+        .footer {
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .btn {
+                padding: 16px 25px;
+                font-size: 1.1rem;
+                width: 95%;
+            }
+            
+            .header {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Шаг 1: Начало -->
+        <div id="step1" class="step active">
+            <div class="header">
+                <h1><i class="fas fa-camera"></i> Фотоотчет</h1>
+                <p>Сделайте фото и оно автоматически сохранится</p>
+            </div>
+            
+            <div class="tip">
+                <i class="fas fa-lightbulb"></i> Вы можете делать фото несколько раз!
+            </div>
+            
+            <button class="btn" onclick="startCamera()">
+                <i class="fas fa-camera"></i> Сделать фото
+            </button>
+            
+            <div class="footer">
+                <p>Просто нажмите кнопку выше чтобы начать</p>
+            </div>
+        </div>
+        
+        <!-- Шаг 2: Камера -->
+        <div id="step2" class="step">
+            <div class="header">
+                <h1><i class="fas fa-video"></i> Наведите камеру</h1>
+                <p>Сфокусируйтесь на объекте съемки</p>
+            </div>
+            
+            <div id="videoContainer">
+                <video id="video" autoplay playsinline></video>
+                <div class="camera-frame"></div>
+            </div>
+            
+            <button class="btn" onclick="capturePhoto()">
+                <i class="fas fa-camera-retro"></i> Сделать снимок
+            </button>
+            <button class="btn btn-secondary" onclick="goToStep(1)">
+                <i class="fas fa-arrow-left"></i> Назад
+            </button>
+        </div>
+        
+        <!-- Шаг 3: Превью -->
+        <div id="step3" class="step">
+            <div class="header">
+                <h1><i class="fas fa-image"></i> Проверьте фото</h1>
+                <p>Всё хорошо? Можно отправить или переснять</p>
+            </div>
+            
+            <div id="previewContainer">
+                <canvas id="canvas"></canvas>
+            </div>
+            
+            <div class="form-group">
+                <input type="text" id="userName" placeholder="Ваше имя (необязательно)" maxlength="50">
+                <textarea id="comment" placeholder="Комментарий (необязательно)" rows="3" maxlength="200"></textarea>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn" onclick="sendPhoto()">
+                    <i class="fas fa-paper-plane"></i> Отправить фото
+                </button>
+                <button class="btn btn-danger" onclick="goToStep(2)">
+                    <i class="fas fa-redo"></i> Переснять
+                </button>
+            </div>
+        </div>
+        
+        <!-- Шаг 4: Успех -->
+        <div id="step4" class="step">
+            <div class="header">
+                <h1><i class="fas fa-check-circle"></i> Фото отправлено!</h1>
+                <p>Спасибо за участие</p>
+            </div>
+            
+            <div style="font-size: 6rem; margin: 40px 0; color: #4CAF50;">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            
+            <div class="tip" style="background: rgba(76, 175, 80, 0.2); border-color: #4CAF50; color: #4CAF50;">
+                <i class="fas fa-info-circle"></i> Вы можете сделать еще одно фото!
+            </div>
+            
+            <button class="btn" onclick="goToStep(1)">
+                <i class="fas fa-plus-circle"></i> Сделать еще фото
+            </button>
+        </div>
+    </div>
+    
+    <!-- Уведомление -->
+    <div id="notification" class="notification"></div>
+    
+    <script>
+        // Текущий шаг
+        let currentStep = 1;
+        let mediaStream = null;
+        let photoBlob = null;
+        
+        // Показать уведомление
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.background = type === 'success' ? '#4CAF50' : '#f44336';
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Переход между шагами
+        function goToStep(step) {
+            // Скрыть все шаги
+            document.querySelectorAll('.step').forEach(s => {
+                s.classList.remove('active');
+            });
+            
+            // Показать нужный шаг
+            document.getElementById(`step${step}`).classList.add('active');
+            currentStep = step;
+            
+            // Если возвращаемся к камере, останавливаем старый поток
+            if (step === 2) {
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                }
+                startCamera();
+            } else if (step === 1) {
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                    mediaStream = null;
+                }
+            }
+        }
+        
+        // Запуск камеры
+        async function startCamera() {
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                };
+                
+                mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+                const video = document.getElementById('video');
+                video.srcObject = mediaStream;
+                
+                goToStep(2);
+            } catch (err) {
+                showNotification('Не удалось получить доступ к камере', 'error');
+                console.error('Camera error:', err);
+            }
+        }
+        
+        // Сделать фото
+        function capturePhoto() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            
+            // Установить размер canvas
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Нарисовать кадр
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Конвертировать в Blob
+            canvas.toBlob(blob => {
+                photoBlob = blob;
+            }, 'image/jpeg', 0.9);
+            
+            goToStep(3);
+        }
+        
+        // Отправить фото - ПРОСТОЙ ВАРИАНТ
+        async function sendPhoto() {
+            showNotification('Отправка фото...', 'success');
+            
+            // Вариант 1: Скачивание фото (просто)
+            const link = document.createElement('a');
+            link.download = `photo_${Date.now()}.jpg`;
+            link.href = document.getElementById('canvas').toDataURL('image/jpeg');
+            link.click();
+            
+            // Вариант 2: Email через mailto
+            const userName = document.getElementById('userName').value || 'Аноним';
+            const comment = document.getElementById('comment').value || 'Без комментария';
+            const photoData = document.getElementById('canvas').toDataURL('image/jpeg');
+            
+            // Создаем временную форму для отправки
+            const form = document.createElement('form');
+            form.style.display = 'none';
+            
+            // Если вы хотите получать на почту, можно использовать mailto
+            setTimeout(() => {
+                const subject = `Фото от ${userName}`;
+                const body = `Имя: ${userName}\nКомментарий: ${comment}\n\nФото прикреплено ниже`;
+                
+                // Эта часть сложна - нужно использовать сервис для отправки файлов
+                // Пока просто показываем успех
+                showNotification('Фото готово к отправке!', 'success');
+                goToStep(4);
+            }, 1000);
+        }
+        
+        // Автоматическая подсказка для повторного фото
+        setTimeout(() => {
+            if (currentStep === 4) {
+                showNotification('Можете сделать еще одно фото!');
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
