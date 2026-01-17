@@ -118,18 +118,19 @@
             margin: 15px 0;
         }
         
-        /* ГАЛЕРЕЯ */
+        /* ГАЛЕРЕЯ - ВАЖНО! Должна быть видна */
         .photo-gallery {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin: 20px 0;
             justify-content: center;
-            max-height: 200px;
+            max-height: 250px;
             overflow-y: auto;
             padding: 10px;
             background: #222;
             border-radius: 10px;
+            min-height: 120px;
         }
         
         .photo-item {
@@ -159,23 +160,6 @@
             height: 25px;
             cursor: pointer;
             font-size: 12px;
-        }
-        
-        /* ПОЛЯ ВВОДА */
-        input, textarea {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            background: #222;
-            border: 1px solid gold;
-            border-radius: 5px;
-            color: white;
-            font-size: 16px;
-        }
-        
-        textarea {
-            height: 80px;
-            resize: vertical;
         }
         
         /* УВЕДОМЛЕНИЯ */
@@ -231,6 +215,15 @@
             color: #888;
             font-style: italic;
             padding: 20px;
+            width: 100%;
+        }
+        
+        /* СЧЕТЧИК */
+        .counter {
+            color: gold;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 10px 0;
         }
     </style>
 </head>
@@ -275,16 +268,13 @@
         <div id="step3" class="step">
             <h1>Ваши фото</h1>
             
-            <div class="photo-gallery" id="photoGallery">
-                <div class="no-photos">Нет фото. Сделайте хотя бы одно!</div>
-            </div>
-            
-            <div style="text-align: center; margin: 15px 0; font-weight: bold; color: gold;">
+            <div class="counter">
                 📸 Фото: <span id="photoCount">0</span>
             </div>
             
-            <input type="text" id="userName" placeholder="Ваше имя (необязательно)">
-            <textarea id="comment" placeholder="Комментарий (необязательно)"></textarea>
+            <div class="photo-gallery" id="photoGallery">
+                <div class="no-photos">Нет фото. Сделайте хотя бы одно!</div>
+            </div>
             
             <button class="btn" onclick="sendPhotos()" id="sendBtn">
                 📤 ОТПРАВИТЬ ФОТО В АЛЬБОМ
@@ -438,26 +428,29 @@ function takePhoto() {
     const photoData = canvas.toDataURL('image/jpeg', 0.9);
     photos.push(photoData);
     
+    // ВАЖНО: Обновляем галерею и счетчик
     updateGallery();
     updateCounter();
     
     showAlert('Фото добавлено!', 'success');
-    goToStep(3); // СРАЗУ переходим к шагу 3 после фото!
+    goToStep(3); // Переходим к галерее
 }
 
 function updateGallery() {
     const gallery = document.getElementById('photoGallery');
+    
+    // Очищаем галерею
+    gallery.innerHTML = '';
     
     if (photos.length === 0) {
         gallery.innerHTML = '<div class="no-photos">Нет фото. Сделайте хотя бы одно!</div>';
         return;
     }
     
-    gallery.innerHTML = '';
-    
+    // Добавляем каждое фото в галерею
     photos.forEach((photo, index) => {
-        const item = document.createElement('div');
-        item.className = 'photo-item';
+        const photoItem = document.createElement('div');
+        photoItem.className = 'photo-item';
         
         const img = document.createElement('img');
         img.src = photo;
@@ -466,11 +459,14 @@ function updateGallery() {
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-btn';
         removeBtn.innerHTML = '×';
-        removeBtn.onclick = () => removePhoto(index);
+        removeBtn.onclick = (e) => {
+            e.stopPropagation();
+            removePhoto(index);
+        };
         
-        item.appendChild(img);
-        item.appendChild(removeBtn);
-        gallery.appendChild(item);
+        photoItem.appendChild(img);
+        photoItem.appendChild(removeBtn);
+        gallery.appendChild(photoItem);
     });
 }
 
@@ -517,15 +513,14 @@ function sendPhotos() {
         
         // 2. Простая инструкция
         const instruction = `
-✅ Фото скачаны!
+✅ Фото скачаны на ваш телефон!
 
 📤 Теперь:
-1. Нажмите "ОК" ниже
-2. Откроется форма
-3. Загрузите фото
-4. Нажмите "Отправить"
+1. Нажмите "ОК"
+2. Загрузите фото в форму
+3. Нажмите "Отправить"
 
-Всё готово!
+Готово! 🎉
         `;
         
         if (confirm(instruction)) {
@@ -535,7 +530,7 @@ function sendPhotos() {
             // 4. Перейти к успеху
             goToStep(4);
             
-            // 5. Очистить фото
+            // 5. Очистить фото через 3 секунды
             setTimeout(() => {
                 photos = [];
                 updateGallery();
@@ -552,6 +547,7 @@ window.onload = function() {
     }
     
     updateCounter();
+    updateGallery();
 };
 
 // Очистка при закрытии
@@ -563,4 +559,3 @@ window.onbeforeunload = function() {
 </script>
 </body>
 </html>
-
