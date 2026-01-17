@@ -2,103 +2,49 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Фото для свадьбы</title>
-
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Arial;background:#f0f9f0;min-height:100vh;padding:20px;text-align:center}
-.container{max-width:500px;margin:0 auto;background:#fff;border-radius:20px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.1)}
-h1{color:#2E7D32;margin:20px 0}
-.step{display:none}
-.step.active{display:block}
-#videoContainer{max-width:400px;margin:20px auto;border-radius:15px;overflow:hidden;background:#000}
-video,canvas{width:100%;border-radius:15px}
-.btn{background:#4CAF50;color:#fff;border:none;padding:15px 30px;font-size:18px;border-radius:50px;margin:10px;width:90%;max-width:300px}
-.btn-red{background:#f44336}
-.btn-blue{background:#2196F3}
-input,textarea{width:90%;max-width:300px;padding:12px;margin:10px;border-radius:10px;border:2px solid #ddd}
-.loader{border:4px solid #f3f3f3;border-top:4px solid #4CAF50;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:20px auto;display:none}
-@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-</style>
+<title>Фото</title>
 </head>
-
 <body>
-<div class="container">
 
-<div id="step1" class="step active">
-<h1>📸 Фото на память</h1>
-<button class="btn" onclick="startCamera()">Начать</button>
-</div>
+<video id="video" autoplay playsinline></video><br>
+<button onclick="photo()">📸 Фото</button><br><br>
+<canvas id="canvas"></canvas><br><br>
 
-<div id="step2" class="step">
-<div id="videoContainer">
-<video id="video" autoplay playsinline></video>
-</div>
-<button class="btn" onclick="takePhoto()">📸 Сделать фото</button>
-<button class="btn btn-blue" onclick="goToStep(1)">← Назад</button>
-</div>
+<input id="name" placeholder="Имя"><br>
+<textarea id="comment" placeholder="Комментарий"></textarea><br><br>
 
-<div id="step3" class="step">
-<canvas id="canvas"></canvas>
-<input id="userName" placeholder="Ваше имя">
-<textarea id="comment" placeholder="Комментарий"></textarea>
-<button class="btn" onclick="sendPhoto()" id="uploadBtn">📤 Отправить</button>
-<button class="btn btn-red" onclick="goToStep(2)">🔄 Переснять</button>
-<div class="loader" id="loader"></div>
-</div>
-
-<div id="step4" class="step">
-<h1>✅ Фото отправлено!</h1>
-<button class="btn" onclick="goToStep(1)">Еще фото</button>
-</div>
-
-</div>
+<button onclick="send()">📤 Отправить</button>
 
 <script>
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFInmV1fscK5TWXZhiYiOdgcdd0V6G-YXCwpEO7GDBZnjDyxaPAL8tfeMGqG-jKLRK/exec";
+const URL = 'https://script.google.com/macros/s/AKfycbzFESSq5wXHO34-31ezqsuScbjiG7mtEgTAE48Xj8LgJIItDyBt-OFPCrRVJDtLnVJl7g/exec';
 
-let stream = null;
-
-function goToStep(n){
-document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
-document.getElementById('step'+n).classList.add('active');
-if(n!==2 && stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
-}
-
-async function startCamera(){
-stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-video.srcObject = stream;
-goToStep(2);
-}
-
-function takePhoto(){
-canvas.width = video.videoWidth;
-canvas.height = video.videoHeight;
-canvas.getContext('2d').drawImage(video,0,0);
-goToStep(3);
-}
-
-async function sendPhoto(){
-document.getElementById('loader').style.display='block';
-uploadBtn.disabled=true;
-
-const formData = new FormData();
-formData.append('photo', canvas.toDataURL('image/jpeg',0.9));
-formData.append('name', userName.value || 'Гость');
-formData.append('comment', comment.value || '');
-
-await fetch(GOOGLE_SCRIPT_URL,{
-method:'POST',
-body:formData
+let stream;
+navigator.mediaDevices.getUserMedia({video:true})
+.then(s => {
+  stream = s;
+  video.srcObject = s;
 });
 
-document.getElementById('loader').style.display='none';
-uploadBtn.disabled=false;
-userName.value='';
-comment.value='';
-goToStep(4);
+function photo(){
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video,0,0);
+}
+
+function send(){
+  const fd = new FormData();
+  fd.append('photo', canvas.toDataURL('image/jpeg',0.9));
+  fd.append('name', name.value);
+  fd.append('comment', comment.value);
+
+  fetch(URL,{
+    method:'POST',
+    body:fd
+  })
+  .then(r=>r.text())
+  .then(t=>alert(t));
 }
 </script>
+
 </body>
 </html>
