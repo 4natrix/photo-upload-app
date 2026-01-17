@@ -499,18 +499,15 @@ function sendPhotos() {
         return;
     }
     
-    const userName = document.getElementById('userName').value || 'Гость';
-    const comment = document.getElementById('comment').value || '';
-    
     showLoader(true);
-    showAlert('Скачиваем ваши фото...', 'success');
+    showAlert('Готовим фото...', 'success');
     
     // 1. Скачать ВСЕ фото на телефон
     setTimeout(() => {
         photos.forEach((photo, index) => {
             const link = document.createElement('a');
             link.href = photo;
-            link.download = `свадьба_${userName}_${index + 1}.jpg`;
+            link.download = `свадьба_фото_${index + 1}.jpg`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -518,41 +515,32 @@ function sendPhotos() {
         
         showLoader(false);
         
-        // 2. Показать инструкцию
+        // 2. Простая инструкция
         const instruction = `
-✅ Все ${photos.length} фото скачаны на ваш телефон!
+✅ Фото скачаны!
 
-📤 Теперь отправьте их в свадебный альбом:
-
+📤 Теперь:
 1. Нажмите "ОК" ниже
-2. Откроется форма Google
-3. Загрузите ВСЕ скачанные фото
-4. Напишите ваше имя (${userName})
-5. Нажмите "ОТПРАВИТЬ" в форме
+2. Откроется форма
+3. Загрузите фото
+4. Нажмите "Отправить"
 
-🎉 Фото сохранятся в свадебном альбоме!
+Всё готово!
         `;
         
         if (confirm(instruction)) {
-            // 3. ОТКРЫВАЕМ GOOGLE ФОРМУ
+            // 3. Открыть Google Форму
             window.open('https://docs.google.com/forms/d/e/1FAIpQLSe6hWt8eu_0qSCi94L7T8GFMluMptkKHRng4Eu4mhapmqAVRA/viewform', '_blank');
             
-            // 4. Перейти к шагу успеха
+            // 4. Перейти к успеху
             goToStep(4);
             
-            // 5. Очистить форму
-            document.getElementById('userName').value = '';
-            document.getElementById('comment').value = '';
-            
-            // 6. Очистить фото через 5 секунд
+            // 5. Очистить фото
             setTimeout(() => {
                 photos = [];
                 updateGallery();
                 updateCounter();
-            }, 5000);
-        } else {
-            // Если пользователь нажал "Отмена"
-            showAlert('Нажмите "Отправить фото в альбом" снова чтобы открыть форму', 'error');
+            }, 3000);
         }
     }, 1000);
 }
@@ -575,3 +563,4 @@ window.onbeforeunload = function() {
 </script>
 </body>
 </html>
+
