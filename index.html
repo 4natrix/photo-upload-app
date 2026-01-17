@@ -591,229 +591,345 @@
     <!-- Уведомление -->
     <div id="notification" class="notification"></div>
     
-    <script>
-        // ===================== КОНФИГУРАЦИЯ =====================
-        const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeiUNCamRqq2ixVA7objXizSqkJY1GLbPA9cn1sjnq0_TJn8Q/viewform";
-        const FORM_ENTRY_ID = "https://docs.google.com/forms/d/e/1FAIpQLSeiUNCamRqq2ixVA7objXizSqkJY1GLbPA9cn1sjnq0_TJn8Q/viewform?usp=header"; // Замените на ID поля загрузки файла из формы
+   <script>
+    // ===================== КОНФИГУРАЦИЯ =====================
+    const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeiUNCamRqq2ixVA7objXizSqkJY1GLbPA9cn1sjnq0_TJn8Q/viewform";
+    
+    // ===================== ПЕРЕМЕННЫЕ =====================
+    let currentStep = 1;
+    let mediaStream = null;
+    let photoFileName = "";
+    let cameraError = false;
+    
+    // ===================== УТИЛИТЫ =====================
+    function showNotification(message, type = 'success', duration = 5000) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.style.display = 'block';
         
-        // ===================== ПЕРЕМЕННЫЕ =====================
-        let currentStep = 1;
-        let mediaStream = null;
-        let photoBlob = null;
-        let photoFileName = "";
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, duration);
+    }
+    
+    function showLoader(show) {
+        const loader = document.getElementById('loader');
+        if (loader) loader.style.display = show ? 'block' : 'none';
+    }
+    
+    // ===================== УПРАВЛЕНИЕ ШАГАМИ =====================
+    function goToStep(step) {
+        // Скрыть все шаги
+        document.querySelectorAll('.step').forEach(s => {
+            s.classList.remove('active');
+        });
         
-        // ===================== УТИЛИТЫ =====================
-        function showNotification(message, type = 'success', duration = 5000) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.style.display = 'block';
-            
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, duration);
-        }
-        
-        function showLoader(show) {
-            const loader = document.getElementById('loader');
-            const sendBtn = document.getElementById('sendBtn');
-            
-            if (show) {
-                loader.style.display = 'block';
-                sendBtn.disabled = true;
-                sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Отправка...</span>';
-            } else {
-                loader.style.display = 'none';
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Отправить фото</span>';
-            }
-        }
-        
-        // ===================== УПРАВЛЕНИЕ ШАГАМИ =====================
-        function goToStep(step) {
-            // Скрыть все шаги
-            document.querySelectorAll('.step').forEach(s => {
-                s.classList.remove('active');
-            });
-            
-            // Показать нужный шаг
-            document.getElementById(`step${step}`).classList.add('active');
+        // Показать нужный шаг
+        const stepElement = document.getElementById(`step${step}`);
+        if (stepElement) {
+            stepElement.classList.add('active');
             currentStep = step;
-            
-            // Очистка ресурсов
-            if (step !== 2 && mediaStream) {
-                mediaStream.getTracks().forEach(track => track.stop());
-                mediaStream = null;
-            }
-            
-            // Запуск камеры при переходе на шаг 2
-            if (step === 2) {
-                setTimeout(() => startCamera(), 100);
-            }
         }
         
-        // ===================== КАМЕРА =====================
-        async function startCamera() {
+        // Очистка ресурсов
+        if (step !== 2 && mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+            mediaStream = null;
+        }
+    }
+    
+    // ===================== КАМЕРА - ИСПРАВЛЕННАЯ ВЕРСИЯ =====================
+    async function startCamera() {
+        // Проверяем поддержку
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            showNotification(
+                'Ваш браузер не поддерживает камеру. Попробуйте другой браузер (Chrome, Safari).',
+                'error',
+                8000
+            );
+            return;
+        }
+        
+        // Показываем сообщение о запросе доступа
+        showNotification('Запрос доступа к камере... Разрешите доступ во всплывающем окне.', 'success', 4000);
+        
+        try {
+            // Останавливаем предыдущий поток
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Пробуем заднюю камеру
+            let constraints = {
+                video: {
+                    facingMode: { exact: "environment" }
+                },
+                audio: false
+            };
+            
+            // Первая попытка - задняя камера
             try {
-                showNotification('Запускаем камеру...', 'success', 2000);
+                mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+            } catch (backError) {
+                console.log('Задняя камера недоступна, пробуем любую камеру:', backError);
                 
-                const constraints = {
-                    video: {
-                        facingMode: 'environment', // Задняя камера
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 },
-                        frameRate: { ideal: 30 }
-                    },
+                // Вторая попытка - любая камера
+                constraints = {
+                    video: true,
                     audio: false
                 };
-                
                 mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-                const video = document.getElementById('video');
-                video.srcObject = mediaStream;
-                
-            } catch (err) {
-                console.error('Camera error:', err);
-                
-                // Пробуем фронтальную камеру если задняя не доступна
-                try {
-                    const constraints = {
-                        video: {
-                            facingMode: 'user',
-                            width: { ideal: 1280 },
-                            height: { ideal: 720 }
-                        },
-                        audio: false
-                    };
-                    
-                    mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-                    const video = document.getElementById('video');
-                    video.srcObject = mediaStream;
-                    
-                    showNotification('Используется фронтальная камера', 'success', 3000);
-                    
-                } catch (secondError) {
-                    showNotification('Не удалось получить доступ к камере. Проверьте разрешения.', 'error');
-                    goToStep(1);
-                }
             }
-        }
-        
-        // ===================== СЪЕМКА ФОТО =====================
-        function capturePhoto() {
+            
+            // Настраиваем видео
             const video = document.getElementById('video');
+            video.srcObject = mediaStream;
+            
+            // Ждем загрузки видео
+            video.onloadedmetadata = () => {
+                video.play();
+                goToStep(2);
+                cameraError = false;
+                showNotification('Камера готова!', 'success', 2000);
+            };
+            
+            // Обработка ошибок видео
+            video.onerror = () => {
+                showNotification('Ошибка загрузки видео. Попробуйте еще раз.', 'error');
+                goToStep(1);
+            };
+            
+        } catch (error) {
+            console.error('Camera error:', error);
+            cameraError = true;
+            
+            let errorMessage = 'Не удалось получить доступ к камере. ';
+            
+            // Конкретные ошибки
+            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                errorMessage += 'Вы запретили доступ к камере. Разрешите доступ в настройках браузера.';
+            } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                errorMessage += 'Камера не найдена на устройстве.';
+            } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+                errorMessage += 'Камера занята другим приложением. Закройте другие приложения камеры.';
+            } else if (error.name === 'OverconstrainedError' || error.name === 'ConstraintNotSatisfiedError') {
+                errorMessage += 'Требуемая камера недоступна.';
+            } else if (error.name === 'SecurityError') {
+                errorMessage += 'Доступ к камере запрещен из соображений безопасности. Используйте HTTPS.';
+            } else {
+                errorMessage += 'Неизвестная ошибка.';
+            }
+            
+            errorMessage += '\n\nПопробуйте:';
+            errorMessage += '\n1. Разрешить доступ к камере';
+            errorMessage += '\n2. Обновить страницу';
+            errorMessage += '\n3. Использовать другой браузер';
+            
+            alert(errorMessage);
+            showNotification('Ошибка камеры', 'error', 5000);
+            
+            // Показываем тестовое изображение для отладки
+            showCameraFallback();
+        }
+    }
+    
+    // Запасной вариант если камера не работает
+    function showCameraFallback() {
+        goToStep(2);
+        
+        const videoContainer = document.querySelector('#videoContainer');
+        if (videoContainer) {
+            const fallbackHTML = `
+                <div style="background: #333; color: white; padding: 40px; border-radius: 20px; text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">📱</div>
+                    <h3>Камера недоступна</h3>
+                    <p>Вы можете продолжить и загрузить фото из галереи</p>
+                    <button onclick="usePhotoFromGallery()" style="
+                        background: #4CAF50;
+                        color: white;
+                        border: none;
+                        padding: 15px 30px;
+                        border-radius: 10px;
+                        margin: 20px 0;
+                        font-size: 16px;
+                        cursor: pointer;">
+                        Выбрать фото из галереи
+                    </button>
+                    <p><small>Или попробуйте обновить страницу и разрешить доступ к камере</small></p>
+                </div>
+            `;
+            videoContainer.innerHTML = fallbackHTML;
+        }
+    }
+    
+    function usePhotoFromGallery() {
+        // Создаем input для выбора файла
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.capture = 'environment';
+        
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.getElementById('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                        photoFileName = file.name;
+                        goToStep(3);
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        
+        input.click();
+    }
+    
+    // ===================== СЪЕМКА ФОТО =====================
+    function capturePhoto() {
+        if (cameraError) {
+            usePhotoFromGallery();
+            return;
+        }
+        
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        
+        if (!video || !canvas) {
+            showNotification('Ошибка элементов страницы', 'error');
+            return;
+        }
+        
+        const context = canvas.getContext('2d');
+        
+        // Установка размеров canvas
+        canvas.width = video.videoWidth || 800;
+        canvas.height = video.videoHeight || 600;
+        
+        // Создание фото
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Сохранение имени файла
+        const userName = document.getElementById('userName').value || 'Гость';
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        photoFileName = `фото_${userName}_${timestamp}.jpg`;
+        
+        goToStep(3);
+    }
+    
+    // ===================== ОТПРАВКА В GOOGLE FORM =====================
+    async function sendToGoogleForm() {
+        const userName = document.getElementById('userName').value || 'Аноним';
+        const comment = document.getElementById('comment').value || '';
+        
+        showNotification('Подготовка фото...', 'success');
+        
+        try {
+            // Скачиваем фото на устройство
             const canvas = document.getElementById('canvas');
-            const context = canvas.getContext('2d');
+            const downloadLink = document.createElement('a');
+            downloadLink.href = canvas.toDataURL('image/jpeg', 0.9);
+            downloadLink.download = photoFileName;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
             
-            // Установка размеров canvas
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            
-            // Зеркальное отражение для фронтальной камеры
-            if (mediaStream && mediaStream.getVideoTracks()[0].getSettings().facingMode === 'user') {
-                context.translate(canvas.width, 0);
-                context.scale(-1, 1);
-            }
-            
-            // Создание фото
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            // Сохранение в Blob
-            canvas.toBlob(blob => {
-                photoBlob = blob;
-                const userName = document.getElementById('userName').value || 'Гость';
-                const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
-                photoFileName = `фото_${userName}_${timestamp}.jpg`;
-            }, 'image/jpeg', 0.92);
-            
-            goToStep(3);
-        }
-        
-        // ===================== ОТПРАВКА В GOOGLE FORM =====================
-        async function sendToGoogleForm() {
-            const userName = document.getElementById('userName').value || 'Аноним';
-            const comment = document.getElementById('comment').value || '';
-            
-            showLoader(true);
-            showNotification('Подготавливаем фото...', 'success', 2000);
-            
-            try {
-                // 1. Создаем временную ссылку для скачивания фото
-                const canvas = document.getElementById('canvas');
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-                
-                // 2. Скачиваем фото на устройство пользователя
-                const downloadLink = document.createElement('a');
-                downloadLink.href = dataUrl;
-                downloadLink.download = photoFileName;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-                
-                // 3. Показываем инструкцию и открываем Google Форму
-                setTimeout(() => {
-                    showLoader(false);
-                    
-                    const instructions = `
-✅ Фото "${photoFileName}" скачано на ваш телефон!
+            // Показываем инструкцию
+            setTimeout(() => {
+                const instructions = `
+✅ Фото "${photoFileName}" скачано!
 
-📋 ДАЛЬНЕЙШИЕ ДЕЙСТВИЯ:
+📤 Теперь отправьте его:
 
-1. Нажмите "ПЕРЕЙТИ К ФОРМЕ" ниже
-2. В открывшейся форме:
-   - Загрузите скачанное фото
-   - Добавьте ваше имя и комментарий
-   - Нажмите "ОТПРАВИТЬ"
+1. Нажмите "ПЕРЕЙТИ К ФОРМЕ"
+2. В открывшейся Google Форме:
+   • Нажмите "Добавить файл"
+   • Выберите скачанное фото
+   • Заполните остальные поля
+   • Нажмите "ОТПРАВИТЬ"
 
-📁 Фото автоматически сохранится в Google Диске!
-                    `;
-                    
-                    if (confirm(instructions)) {
-                        // Открываем Google Форму в новом окне
-                        window.open(GOOGLE_FORM_URL, '_blank', 'noopener,noreferrer');
-                    }
-                    
-                    // Переходим к шагу успеха
-                    goToStep(4);
-                    
-                    // Автоматическое напоминание о возможности сделать еще фото
-                    setTimeout(() => {
-                        showNotification('Хотите сделать еще одно фото?', 'success', 4000);
-                    }, 2000);
-                    
-                }, 1500);
+🎉 Фото сохранится в нашем альбоме!
+                `;
                 
-            } catch (error) {
-                console.error('Send error:', error);
-                showLoader(false);
-                showNotification('Ошибка при подготовке фото. Попробуйте еще раз.', 'error');
-            }
-        }
-        
-        // ===================== ИНИЦИАЛИЗАЦИЯ =====================
-        document.addEventListener('DOMContentLoaded', () => {
-            // Проверка поддержки камеры
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showNotification('Ваш браузер не поддерживает камеру', 'error');
-                document.querySelector('#step1 .btn').disabled = true;
-            }
-            
-            // Автофокус на поле имени при открытии шага 3
-            const observer = new MutationObserver(() => {
-                if (currentStep === 3) {
-                    setTimeout(() => {
-                        document.getElementById('userName').focus();
-                    }, 300);
+                if (confirm(instructions)) {
+                    // Открываем Google Форму
+                    window.open(GOOGLE_FORM_URL, '_blank', 'noopener,noreferrer');
                 }
-            });
+                
+                goToStep(4);
+                
+            }, 1000);
             
-            observer.observe(document.body, { childList: true, subtree: true });
-        });
+        } catch (error) {
+            console.error('Send error:', error);
+            showNotification('Ошибка при сохранении фото', 'error');
+        }
+    }
+    
+    // ===================== ИНИЦИАЛИЗАЦИЯ =====================
+    document.addEventListener('DOMContentLoaded', () => {
+        // Проверка браузера и камеры
+        const cameraCheck = () => {
+            const supported = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+            const startBtn = document.querySelector('#step1 .btn');
+            
+            if (startBtn) {
+                if (!supported) {
+                    startBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Браузер не поддерживает камеру</span>';
+                    startBtn.disabled = true;
+                    startBtn.style.background = '#999';
+                    showNotification('Используйте Chrome или Safari на телефоне', 'error', 10000);
+                }
+            }
+        };
         
-        // ===================== ОБРАБОТКА ОШИБОК =====================
-        window.addEventListener('error', (e) => {
-            console.error('Global error:', e.error);
-            showNotification('Произошла ошибка. Пожалуйста, перезагрузите страницу.', 'error');
-        });
-    </script>
+        cameraCheck();
+        
+        // Добавляем кнопку "Разрешить камеру" на стартовом экране
+        const step1 = document.getElementById('step1');
+        if (step1) {
+            const permissionBtn = document.createElement('button');
+            permissionBtn.className = 'btn btn-secondary';
+            permissionBtn.style.marginTop = '10px';
+            permissionBtn.innerHTML = '<i class="fas fa-cog"></i><span>Проверить доступ к камере</span>';
+            permissionBtn.onclick = () => {
+                if (navigator.permissions && navigator.permissions.query) {
+                    navigator.permissions.query({name: 'camera'})
+                        .then(permissionStatus => {
+                            alert(`Статус камеры: ${permissionStatus.state}\n\nЕсли "denied" или "prompt":\n1. Зайдите в настройки браузера\n2. Найдите "Камера"\n3. Разрешите доступ для этого сайта`);
+                        })
+                        .catch(() => {
+                            alert('Проверьте настройки камеры в браузере');
+                        });
+                } else {
+                    alert('Проверьте настройки камеры в настройках браузера');
+                }
+            };
+            
+            step1.querySelector('.btn-group')?.appendChild(permissionBtn) || 
+            step1.appendChild(permissionBtn);
+        }
+    });
+    
+    // Автоматическое напоминание о повторной съемке
+    setInterval(() => {
+        if (currentStep === 4) {
+            // Через 5 секунд после успеха показываем подсказку
+            setTimeout(() => {
+                showNotification('Хотите сделать еще фото?', 'success', 4000);
+            }, 5000);
+        }
+    }, 10000);
+</script>
 </body>
 </html>
+
