@@ -74,7 +74,7 @@
             padding: 15px 25px;
             font-size: 18px;
             border-radius: 10px;
-            margin: 10px 5px;
+            margin: 10px 0;
             cursor: pointer;
             width: 100%;
             font-weight: bold;
@@ -203,19 +203,6 @@
             color: white;
         }
         
-        /* СЧЕТЧИК */
-        .counter {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: gold;
-            color: black;
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            display: none;
-        }
-        
         /* ЗАГРУЗЧИК */
         .loader {
             border: 4px solid #333;
@@ -292,6 +279,10 @@
                 <div class="no-photos">Нет фото. Сделайте хотя бы одно!</div>
             </div>
             
+            <div style="text-align: center; margin: 15px 0; font-weight: bold; color: gold;">
+                📸 Фото: <span id="photoCount">0</span>
+            </div>
+            
             <input type="text" id="userName" placeholder="Ваше имя (необязательно)">
             <textarea id="comment" placeholder="Комментарий (необязательно)"></textarea>
             
@@ -324,9 +315,6 @@
     
     <!-- Уведомление -->
     <div class="alert" id="alert"></div>
-    
-    <!-- Счетчик -->
-    <div class="counter" id="counter">📸: 0</div>
 
 <script>
 // =========== ПЕРЕМЕННЫЕ ===========
@@ -363,31 +351,27 @@ function showLoader(show) {
 }
 
 function updateCounter() {
-    const counter = document.getElementById('counter');
+    const counter = document.getElementById('photoCount');
     const clearBtn = document.getElementById('clearBtn');
     
+    counter.textContent = photos.length;
+    
     if (photos.length > 0) {
-        counter.textContent = `📸: ${photos.length}`;
-        counter.style.display = 'block';
         clearBtn.style.display = 'block';
     } else {
-        counter.style.display = 'none';
         clearBtn.style.display = 'none';
     }
 }
 
 // =========== ШАГИ ===========
 function goToStep(step) {
-    // Скрыть все шаги
     document.querySelectorAll('.step').forEach(stepEl => {
         stepEl.classList.remove('active');
     });
     
-    // Показать нужный шаг
     document.getElementById(`step${step}`).classList.add('active');
     currentStep = step;
     
-    // Остановить камеру если уходим
     if (step !== 2 && videoStream) {
         videoStream.getTracks().forEach(track => track.stop());
         videoStream = null;
@@ -398,7 +382,6 @@ function goToStep(step) {
 function switchCamera(type) {
     currentCamera = type;
     
-    // Обновить кнопки
     document.getElementById('backBtn').style.background = type === 'back' ? 'gold' : '#333';
     document.getElementById('frontBtn').style.background = type === 'front' ? 'gold' : '#333';
     
@@ -409,7 +392,6 @@ function switchCamera(type) {
 
 async function startCamera() {
     try {
-        // Остановить старую камеру
         if (videoStream) {
             videoStream.getTracks().forEach(track => track.stop());
         }
@@ -445,7 +427,6 @@ function takePhoto() {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     
-    // Правильное отображение для селфи
     if (currentCamera === 'front') {
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
@@ -457,11 +438,11 @@ function takePhoto() {
     const photoData = canvas.toDataURL('image/jpeg', 0.9);
     photos.push(photoData);
     
-    // Обновить галерею
     updateGallery();
     updateCounter();
     
     showAlert('Фото добавлено!', 'success');
+    goToStep(3); // СРАЗУ переходим к шагу 3 после фото!
 }
 
 function updateGallery() {
@@ -511,7 +492,7 @@ function clearAllPhotos() {
     }
 }
 
-// =========== ОТПРАВКА ===========
+// =========== ОТПРАВКА ФОТО ===========
 function sendPhotos() {
     if (photos.length === 0) {
         showAlert('Сначала сделайте фото!', 'error');
@@ -524,37 +505,39 @@ function sendPhotos() {
     showLoader(true);
     showAlert('Скачиваем ваши фото...', 'success');
     
-    // 1. Скачать все фото на телефон
+    // 1. Скачать ВСЕ фото на телефон
     setTimeout(() => {
         photos.forEach((photo, index) => {
             const link = document.createElement('a');
             link.href = photo;
             link.download = `свадьба_${userName}_${index + 1}.jpg`;
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
         });
         
         showLoader(false);
         
         // 2. Показать инструкцию
         const instruction = `
-✅ Все ${photos.length} фото скачаны!
+✅ Все ${photos.length} фото скачаны на ваш телефон!
 
-📤 Теперь:
+📤 Теперь отправьте их в свадебный альбом:
 
 1. Нажмите "ОК" ниже
 2. Откроется форма Google
-3. Загрузите все скачанные фото
-4. Напишите ваше имя: ${userName}
-5. Нажмите "ОТПРАВИТЬ"
+3. Загрузите ВСЕ скачанные фото
+4. Напишите ваше имя (${userName})
+5. Нажмите "ОТПРАВИТЬ" в форме
 
 🎉 Фото сохранятся в свадебном альбоме!
         `;
         
         if (confirm(instruction)) {
-            // 3. Открыть Google Форму
+            // 3. ОТКРЫВАЕМ GOOGLE ФОРМУ
             window.open('https://docs.google.com/forms/d/e/1FAIpQLSe6hWt8eu_0qSCi94L7T8GFMluMptkKHRng4Eu4mhapmqAVRA/viewform', '_blank');
             
-            // 4. Перейти к успеху
+            // 4. Перейти к шагу успеха
             goToStep(4);
             
             // 5. Очистить форму
@@ -567,6 +550,9 @@ function sendPhotos() {
                 updateGallery();
                 updateCounter();
             }, 5000);
+        } else {
+            // Если пользователь нажал "Отмена"
+            showAlert('Нажмите "Отправить фото в альбом" снова чтобы открыть форму', 'error');
         }
     }, 1000);
 }
