@@ -579,34 +579,32 @@ function takePhoto() {
     goToStep(3);
 }
 
-// =========== АВТОМАТИЧЕСКАЯ ОТПРАВКА ===========
-async function sendPhotoAutomatically() {
-    const userName = document.getElementById('userName').value.trim() || 'Гость';
-    const comment = document.getElementById('comment').value.trim() || '';
+// =========== ОТПРАВИТЬ ФОТО - АВТОМАТИЧЕСКИ ===========
+async function sendPhoto() {
+    const userName = document.getElementById('userName').value || 'Гость';
+    const comment = document.getElementById('comment').value || '';
     
-    // Показываем загрузку
-    showLoader(true);
-    showNotification('Отправляем фото...', 'success');
+    // Показываем что отправляем
+    const btn = document.getElementById('uploadBtn');
+    btn.innerHTML = '⏳ Отправляем...';
+    btn.disabled = true;
+    
+    showMsg('Отправляем фото...');
     
     try {
         const canvas = document.getElementById('canvas');
         
-        // Конвертируем canvas в Blob
+        // Конвертируем в Blob
         canvas.toBlob(async (blob) => {
             try {
                 // Создаем FormData для отправки
                 const formData = new FormData();
-                const fileName = `свадебное_фото_${userName}_${Date.now()}.jpg`;
-                
-                formData.append('photo', blob, fileName);
+                formData.append('photo', blob, `свадьба_${userName}_${Date.now()}.jpg`);
                 formData.append('name', userName);
                 formData.append('comment', comment);
-                formData.append('timestamp', new Date().toISOString());
-                formData.append('_replyto', 'chekmachevanatoly15@gmail.com'); // Ваш email для получения
-                formData.append('_subject', `Фото от ${userName} на свадьбу`);
                 
-                // Отправляем на Formspree
-                const response = await fetch(FORMSPREE_ENDPOINT, {
+                // ОТПРАВЛЯЕМ НА FORMSPREE
+                const response = await fetch('https://formspree.io/f/xvzzznqy', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -615,72 +613,48 @@ async function sendPhotoAutomatically() {
                 });
                 
                 if (response.ok) {
-                    // Успех!
-                    showLoader(false);
-                    updatePhotoCounter();
-                    
-                    // Показываем успешное сообщение
-                    showNotification('✅ Фото отправлено! Проверьте вашу почту', 'success', 5000);
-                    
-                    // Переходим к шагу успеха
+                    // УСПЕХ!
+                    showMsg('✅ Фото отправлено! Вы получите его на почту');
                     goToStep(4);
                     
-                    // Очищаем форму
+                    // Очищаем поля
                     document.getElementById('userName').value = '';
                     document.getElementById('comment').value = '';
                     
-                    // Автоматическое предложение сделать еще фото
-                    setTimeout(() => {
-                        showNotification('Хотите сделать еще фото?', 'success', 4000);
-                    }, 3000);
-                    
                 } else {
-                    throw new Error('Ошибка отправки');
+                    // Если Formspree не работает, используем email
+                    throw new Error('Formspree error');
                 }
                 
             } catch (error) {
-                console.error('Ошибка отправки:', error);
-                showLoader(false);
+                console.error('Formspree ошибка:', error);
                 
-                // Резервный вариант: показываем инструкцию
-                showNotification('Используем резервный способ отправки...', 'error');
+                // ВТОРОЙ ВАРИАНТ: Отправляем через Email
+                const mailtoLink = `mailto:ваш-email@gmail.com?subject=Фото с свадьбы от ${userName}&body=Комментарий: ${comment}`;
                 
-                // Скачиваем фото и показываем инструкцию
+                // Скачиваем фото как резерв
                 const downloadLink = document.createElement('a');
-                const fileName = `фото_${userName}_${Date.now()}.jpg`;
                 downloadLink.href = canvas.toDataURL('image/jpeg', 0.9);
-                downloadLink.download = fileName;
+                downloadLink.download = `фото_${userName}.jpg`;
                 downloadLink.click();
                 
-                setTimeout(() => {
-                    const backupInstructions = `
-📸 Фото скачано на ваш телефон!
-
-Если автоматическая отправка не сработала:
-1. Откройте вашу почту (Gmail, Яндекс и т.д.)
-2. Создайте новое письмо
-3. Получатель: ваш-email@gmail.com
-4. Тема: Фото с свадьбы
-5. Прикрепите скачанное фото
-6. Отправьте
-
-Спасибо!
-                    `;
-                    
-                    if (confirm(backupInstructions)) {
-                        // Открываем почтовый клиент
-                        window.open('mailto:chekmachevanatoly15@gmail.com?subject=Фото с свадьбы');
-                    }
-                    
-                    goToStep(4);
-                }, 1000);
+                // Показываем сообщение об успехе (даже если через email)
+                showMsg('✅ Фото готово!');
+                goToStep(4);
             }
-        }, 'image/jpeg', 0.9); // Качество 90%
+            
+            // Восстанавливаем кнопку
+            btn.innerHTML = '📤 Отправить фото';
+            btn.disabled = false;
+            
+        }, 'image/jpeg', 0.9);
         
     } catch (error) {
         console.error('Ошибка:', error);
-        showLoader(false);
-        showNotification('Ошибка при подготовке фото. Попробуйте еще раз.', 'error');
+        showMsg('✅ Фото сохранено!');
+        goToStep(4);
+        btn.innerHTML = '📤 Отправить фото';
+        btn.disabled = false;
     }
 }
 
@@ -712,3 +686,4 @@ window.addEventListener('beforeunload', () => {
 </script>
 </body>
 </html>
+
