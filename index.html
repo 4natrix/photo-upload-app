@@ -5,147 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Фото на свадьбу</title>
 <style>
-body{font-family:Arial,sans-serif;text-align:center;background:#f0f9f0;padding:20px;}
-.container{max-width:500px;margin:0 auto;background:white;border-radius:20px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,0.1);}
-.step{display:none;}
-.step.active{display:block;}
-video,canvas{width:100%;border-radius:15px;}
-input,textarea{width:90%;margin:10px 0;padding:12px;border:2px solid #ddd;border-radius:10px;font-size:16px;}
-.btn{background:#4CAF50;color:white;border:none;padding:15px 30px;font-size:18px;border-radius:50px;margin:10px;cursor:pointer;width:90%;max-width:300px;transition:all 0.3s;}
-.btn:hover{background:#388E3C;}
-.loader{border:4px solid #f3f3f3;border-top:4px solid #4CAF50;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:20px auto;display:none;}
-@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-.notification{position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:15px;border-radius:10px;display:none;}
-.notification.error{background:#f44336;}
+body { font-family: Arial, sans-serif; text-align:center; background:#f0f9f0; padding:20px; }
+.container { max-width:500px; margin:50px auto; background:white; border-radius:20px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1); }
+h1 { margin-bottom:20px; }
+p { margin-bottom:20px; }
+.btn { background:#4CAF50; color:white; border:none; padding:15px 30px; font-size:18px; border-radius:50px; cursor:pointer; text-decoration:none; display:inline-block; transition:all 0.3s; }
+.btn:hover { background:#388E3C; }
 </style>
 </head>
 <body>
 <div class="container">
-
-<!-- ШАГ 1 -->
-<div id="step1" class="step active">
 <h1>📸 Фото на память</h1>
-<p>Сделайте фото для нашего свадебного альбома</p>
-<button class="btn" onclick="startCamera()">Начать фотографировать</button>
+<p>Сделайте фото для нашего свадебного альбома через форму Google</p>
+<a href="https://docs.google.com/forms/d/e/1FAIpQLSeiUNCamRqq2ixVA7objXizSqkJY1GLbPA9cn1sjnq0_TJn8Q/viewform?usp=header" target="_blank" class="btn">Открыть форму</a>
+<p>После отправки фото и комментария они автоматически появятся в альбоме!</p>
 </div>
-
-<!-- ШАГ 2 -->
-<div id="step2" class="step">
-<h1>👁️ Сфотографируйте</h1>
-<video id="video" autoplay playsinline></video>
-<div class="btn-group">
-<button class="btn" onclick="takePhoto()">📸 Сделать фото</button>
-<button class="btn" onclick="goToStep(1)">← Назад</button>
-</div>
-</div>
-
-<!-- ШАГ 3 -->
-<div id="step3" class="step">
-<h1>👀 Проверьте фото</h1>
-<canvas id="canvas"></canvas>
-<input type="text" id="userName" placeholder="Ваше имя (необязательно)">
-<textarea id="comment" placeholder="Комментарий (необязательно)" rows="2"></textarea>
-<div class="btn-group">
-<button class="btn" onclick="sendPhoto()" id="uploadBtn">📤 Отправить фото</button>
-<button class="btn" onclick="goToStep(2)">🔄 Переснять</button>
-</div>
-<div class="loader" id="loader"></div>
-</div>
-
-<!-- ШАГ 4 -->
-<div id="step4" class="step">
-<h1>✅ Фото отправлено!</h1>
-<button class="btn" onclick="goToStep(1)">📸 Сделать еще фото</button>
-</div>
-
-</div>
-<div id="notification" class="notification"></div>
-
-<script>
-// ================== Настройка ==================
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwo_-nE5kbL57mhcOGSQxCL6GpVWEcZtl19WdZ8jVvUvQaJaCQAxIQehVwRJccaEvaXqA/exec";
-
-// ================== Переменные ==================
-let currentStep=1;
-let videoStream=null;
-let photoData=null;
-
-// ================== Уведомления ==================
-function showMsg(text,type='success'){
-  const msg=document.getElementById('notification');
-  msg.textContent=text;
-  msg.className='notification'+(type==='error'? ' error':'');
-  msg.style.display='block';
-  setTimeout(()=>{msg.style.display='none';},3000);
-}
-
-// ================== Лоадер ==================
-function showLoader(show){
-  const loader=document.getElementById('loader');
-  const btn=document.getElementById('uploadBtn');
-  if(show){loader.style.display='block';btn.disabled=true;btn.innerHTML='⏳ Отправляем...';}
-  else{loader.style.display='none';btn.disabled=false;btn.innerHTML='📤 Отправить фото';}
-}
-
-// ================== Переход по шагам ==================
-function goToStep(step){
-  document.querySelectorAll('.step').forEach(el=>el.classList.remove('active'));
-  document.getElementById(`step${step}`).classList.add('active');
-  currentStep=step;
-  if(step!==2 && videoStream){videoStream.getTracks().forEach(t=>t.stop());videoStream=null;}
-}
-
-// ================== Камера ==================
-async function startCamera(){
-  try{
-    if(videoStream){videoStream.getTracks().forEach(t=>t.stop());}
-    videoStream=await navigator.mediaDevices.getUserMedia({
-      video:{width:{ideal:1280},height:{ideal:720}},audio:false
-    });
-    document.getElementById('video').srcObject=videoStream;
-    goToStep(2);
-  }catch(e){console.error(e);showMsg('Не удалось включить камеру','error');goToStep(1);}
-}
-
-// ================== Сделать фото ==================
-function takePhoto(){
-  const video=document.getElementById('video');
-  const canvas=document.getElementById('canvas');
-  const ctx=canvas.getContext('2d');
-  canvas.width=video.videoWidth;
-  canvas.height=video.videoHeight;
-  ctx.drawImage(video,0,0,canvas.width,canvas.height);
-  photoData=canvas.toDataURL('image/jpeg',0.9);
-  goToStep(3);
-}
-
-// ================== Отправить фото ==================
-async function sendPhoto(){
-  const name=document.getElementById('userName').value||'Гость';
-  const comment=document.getElementById('comment').value||'';
-  showLoader(true); showMsg('Сохраняем фото...');
-  try{
-    const data={photo:photoData,name,comment};
-    const resp = await fetch(GOOGLE_SCRIPT_URL, {
-  method: 'POST',
-  headers: {'Content-Type':'application/json'},
-  body: JSON.stringify({photo: photoData, name, comment})
-});
-const result = await resp.json();
-    if(result.success){
-      showLoader(false);
-      showMsg('✅ Фото сохранено!');
-      setTimeout(()=>goToStep(4),1500);
-    } else throw new Error(result.error||'Ошибка сервера');
-  }catch(err){
-    console.error(err);
-    showLoader(false);
-    showMsg('Ошибка отправки','error');
-  }
-}
-</script>
 </body>
 </html>
-
-
-
