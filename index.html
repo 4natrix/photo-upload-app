@@ -73,146 +73,93 @@
         }
         
         // 1. Включить камеру
-        startBtn.addEventListener('click', async () => {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'user' },
-                    audio: false
-                });
-                
-                video.srcObject = stream;
-                video.style.display = 'block';
-                photo.style.display = 'none';
-                
-                startBtn.style.display = 'none';
-                captureBtn.style.display = 'flex';
-                nameInput.style.display = 'none';
-                
-                showStatus('📸 Камера включена! Улыбнитесь!', 'success');
-            } catch (err) {
-                showStatus('❌ Не удалось включить камеру', 'error');
+       // Замени функцию sendBtn.addEventListener('click', ...) на эту:
+
+sendBtn.addEventListener('click', async () => {
+    if (!photoBlob) return;
+    
+    const guestName = nameInput.value.trim() || 'Анонимный гость';
+    const timestamp = new Date().toLocaleString('ru-RU');
+    
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '⏳ Отправка...';
+    showStatus('🔄 Отправляем фото...', 'success');
+    
+    try {
+        // А. Конвертируем в Base64
+        showStatus('📤 Подготавливаем фото...', 'success');
+        
+        const reader = new FileReader();
+        const photoBase64 = await new Promise((resolve) => {
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(photoBlob);
+        });
+        
+        // Б. Отправляем на FreeImage.Host (без ключа!)
+        showStatus('🖼️ Загружаем на хостинг...', 'success');
+        
+        // Извлекаем base64 данные (без data:image/jpeg;base64,)
+        const base64Data = photoBase64.split(',')[1];
+        
+        const freeImageResponse = await fetch('https://freeimage.host/api/1/upload', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                key: '6d207e02198a847aa98d0a2a901485a5', // публичный ключ
+                source: base64Data,
+                format: 'json'
+            })
+        });
+        
+        const freeImageData = await freeImageResponse.json();
+        
+        if (!freeImageData.image || !freeImageData.image.url) {
+            throw new Error('Ошибка загрузки фото');
+        }
+        
+        const photoUrl = freeImageData.image.url;
+        console.log('✅ Фото загружено:', photoUrl);
+        
+        // В. Отправляем на Formspree
+        showStatus('📨 Отправляем уведомление...', 'success');
+        
+        const formData = new FormData();
+        formData.append('Имя гостя', guestName);
+        formData.append('Дата и время', timestamp);
+        formData.append('Ссылка на фото', photoUrl);
+        formData.append('Устройство', navigator.userAgent.substring(0, 100));
+        formData.append('_subject', `🎉 Свадебное фото от ${guestName}`);
+        
+        await fetch(FORMSPREE_URL, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
             }
         });
         
-        // 2. Сделать фото
-        captureBtn.addEventListener('click', () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            
-            const ctx = canvas.getContext('2d');
-            ctx.translate(canvas.width, 0);
-            ctx.scale(-1, 1);
-            ctx.drawImage(video, 0, 0);
-            
-            canvas.toBlob(blob => {
-                photoBlob = blob;
-                photo.src = URL.createObjectURL(blob);
-                video.style.display = 'none';
-                photo.style.display = 'block';
-                
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                    stream = null;
-                }
-                
-                captureBtn.style.display = 'none';
-                retakeBtn.style.display = 'flex';
-                sendBtn.style.display = 'flex';
-                nameInput.style.display = 'block';
-                
-                showStatus('✅ Отличное фото! Можно отправлять.', 'success');
-            }, 'image/jpeg', 0.85);
-        });
+        // УСПЕХ
+        showStatus('🎉 Фото отправлено! Проверь почту.', 'success');
         
-        // 3. Переснять
-        retakeBtn.addEventListener('click', () => {
-            photoBlob = null;
-            photo.style.display = 'none';
-            nameInput.style.display = 'none';
-            startBtn.click();
-        });
+        // Показываем ссылку
+        setTimeout(() => {
+            alert(`✅ Фото отправлено!\n\nСсылка: ${photoUrl}\n\nСохрани ссылку!`);
+        }, 500);
         
-        // 4. Отправить (ГЛАВНОЕ!)
-        sendBtn.addEventListener('click', async () => {
-            if (!photoBlob) return;
-            
-            const guestName = nameInput.value.trim() || 'Анонимный гость';
-            const timestamp = new Date().toLocaleString('ru-RU');
-            
-            sendBtn.disabled = true;
-            sendBtn.innerHTML = '⏳ Отправка...';
-            showStatus('🔄 Отправляем фото...', 'success');
-            
-            try {
-                // А. Загружаем фото на ImgBB
-                showStatus('📤 Загружаем фото...', 'success');
-                
-                const imgbbForm = new FormData();
-                imgbbForm.append('image', photoBlob);
-                
-                const imgbbRes = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
-                    method: 'POST',
-                    body: imgbbForm
-                });
-                
-                const imgbbData = await imgbbRes.json();
-                
-                if (!imgbbData.success) {
-                    throw new Error('Ошибка загрузки фото');
-                }
-                
-                const photoUrl = imgbbData.data.url;
-                
-                // Б. Отправляем на Formspree
-                showStatus('📨 Отправляем уведомление...', 'success');
-                
-                const formData = new FormData();
-                formData.append('Имя гостя', guestName);
-                formData.append('Дата и время', timestamp);
-                formData.append('Ссылка на фото', photoUrl);
-                formData.append('Устройство', navigator.userAgent.substring(0, 100));
-                
-                // Добавляем тему письма
-                formData.append('_subject', `🎉 Свадебное фото от ${guestName}`);
-                
-                await fetch(FORMSPREE_URL, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                // УСПЕХ
-                showStatus('🎉 Фото отправлено! Проверь почту.', 'success');
-                
-                // Сохраняем ссылку
-                const savedPhotos = JSON.parse(localStorage.getItem('wedding_photos') || '[]');
-                savedPhotos.push({
-                    name: guestName,
-                    url: photoUrl,
-                    time: timestamp
-                });
-                localStorage.setItem('wedding_photos', JSON.stringify(savedPhotos));
-                
-                // Показываем ссылку
-                setTimeout(() => {
-                    alert(`✅ Фото отправлено!\n\nСсылка: ${photoUrl}\n\nСкопируй на случай если письмо не придёт.`);
-                }, 500);
-                
-                // Сбрасываем форму
-                setTimeout(() => {
-                    location.reload();
-                }, 4000);
-                
-            } catch (error) {
-                console.error('Ошибка:', error);
-                showStatus('❌ Ошибка отправки', 'error');
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = '✈️ Отправить';
-            }
-        });
+        // Сбрасываем форму
+        setTimeout(() => {
+            location.reload();
+        }, 4000);
+        
+    } catch (error) {
+        console.error('❌ Ошибка:', error);
+        showStatus('❌ Ошибка: ' + error.message, 'error');
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '✈️ Отправить';
+    }
+});
         
         // При загрузке
         window.addEventListener('load', () => {
@@ -221,5 +168,6 @@
     </script>
 </body>
 </html>
+
 
 
