@@ -64,11 +64,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transform: scaleX(1); /* По умолчанию нормально */
-        }
-        
-        video.front-camera {
-            transform: scaleX(-1); /* Зеркально для селфи */
         }
         
         /* КНОПКИ */
@@ -159,10 +154,6 @@
             object-fit: cover;
         }
         
-        .photo-item img.front-photo {
-            transform: scaleX(-1); /* Зеркально для селфи-фото */
-        }
-        
         .remove-btn {
             position: absolute;
             top: 5px;
@@ -203,30 +194,6 @@
             color: white;
         }
         
-        /* ЗАГРУЗЧИК */
-        .loader {
-            border: 4px solid #333;
-            border-top: 4px solid gold;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-            display: none;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* УСПЕХ */
-        .success-icon {
-            font-size: 60px;
-            color: gold;
-            margin: 20px 0;
-        }
-        
         .no-photos {
             color: #888;
             font-style: italic;
@@ -234,7 +201,6 @@
             width: 100%;
         }
         
-        /* СЧЕТЧИК */
         .counter {
             color: gold;
             font-weight: bold;
@@ -242,12 +208,9 @@
             margin: 10px 0;
         }
         
-        /* ИНДИКАТОР КАМЕРЫ */
-        .camera-status {
-            color: #4CAF50;
-            font-size: 14px;
-            margin: 10px 0;
-            display: none;
+        .camera-error {
+            color: red;
+            padding: 20px;
         }
     </style>
 </head>
@@ -256,9 +219,9 @@
         <!-- ШАГ 1 -->
         <div id="step1" class="step active">
             <h1>📸 Свадебная фотокабина</h1>
-            <p>Сделайте фото для нашего альбома! Все фото автоматически сохранятся.</p>
+            <p>Сделайте фото для нашего альбома!</p>
             
-            <button class="btn" onclick="startCamera()">
+            <button class="btn" onclick="startCameraSimple()" id="startBtn">
                 НАЧАТЬ ФОТОГРАФИРОВАТЬ
             </button>
         </div>
@@ -267,27 +230,26 @@
         <div id="step2" class="step">
             <h1>Сделайте фото</h1>
             
-            <div class="camera-status" id="cameraStatus">
-                🔴 Камера не активна
-            </div>
-            
             <div class="camera-switch">
-                <button class="btn-small active" onclick="switchCamera('back')" id="backBtn">
-                    📷 Задняя камера
+                <button class="btn-small active" onclick="switchCameraSimple('back')" id="backBtn">
+                    📷 Задняя
                 </button>
-                <button class="btn-small" onclick="switchCamera('front')" id="frontBtn">
-                    🤳 Селфи камера
+                <button class="btn-small" onclick="switchCameraSimple('front')" id="frontBtn">
+                    🤳 Селфи
                 </button>
             </div>
             
             <div class="camera-box">
                 <video id="video" autoplay playsinline></video>
+                <div id="cameraError" class="camera-error" style="display: none;">
+                    Камера не работает. Обновите страницу.
+                </div>
             </div>
             
-            <button class="btn" onclick="takePhoto()">
+            <button class="btn" onclick="takePhotoSimple()">
                 📸 СДЕЛАТЬ ФОТО
             </button>
-            <button class="btn blue" onclick="goToStep(1)">
+            <button class="btn blue" onclick="goToStepSimple(1)">
                 ← НАЗАД
             </button>
         </div>
@@ -304,44 +266,40 @@
                 <div class="no-photos">Нет фото. Сделайте хотя бы одно!</div>
             </div>
             
-            <button class="btn" onclick="sendPhotos()" id="sendBtn">
-                📤 ОТПРАВИТЬ ФОТО В АЛЬБОМ
+            <button class="btn" onclick="sendPhotosSimple()" id="sendBtn">
+                📤 ОТПРАВИТЬ ФОТО
             </button>
             
-            <button class="btn blue" onclick="goToCamera()">
+            <button class="btn blue" onclick="goToStepSimple(2)">
                 ＋ СДЕЛАТЬ ЕЩЁ ФОТО
             </button>
             
             <button class="btn red" onclick="clearAllPhotos()" id="clearBtn" style="display: none;">
-                🗑️ ОЧИСТИТЬ ВСЕ ФОТО
+                🗑️ УДАЛИТЬ ВСЕ
             </button>
-            
-            <div class="loader" id="loader"></div>
         </div>
         
         <!-- ШАГ 4 -->
         <div id="step4" class="step">
-            <div class="success-icon">✅</div>
-            <h1>Фото отправлены!</h1>
+            <h1 style="color: green;">✅ Фото отправлены!</h1>
             <p>Спасибо! Ваши фото сохранены в свадебном альбоме</p>
             
-            <button class="btn" onclick="goToStep(1)">
+            <button class="btn" onclick="goToStepSimple(1)">
                 📸 СДЕЛАТЬ ЕЩЁ ФОТО
             </button>
         </div>
     </div>
     
-    <!-- Уведомление -->
     <div class="alert" id="alert"></div>
 
 <script>
-// =========== ПЕРЕМЕННЫЕ ===========
+// =========== ПРОСТЫЕ ПЕРЕМЕННЫЕ ===========
 let currentStep = 1;
 let videoStream = null;
 let currentCamera = 'back';
-let photos = []; // Массив для фото [{data: 'base64', isFront: false}, ...]
+let photos = [];
 
-// =========== УТИЛИТЫ ===========
+// =========== ПРОСТЫЕ УТИЛИТЫ ===========
 function showAlert(text, type = 'success') {
     const alert = document.getElementById('alert');
     alert.textContent = text;
@@ -353,134 +311,94 @@ function showAlert(text, type = 'success') {
     }, 3000);
 }
 
-function showLoader(show) {
-    const loader = document.getElementById('loader');
-    const btn = document.getElementById('sendBtn');
-    
-    if (show) {
-        loader.style.display = 'block';
-        btn.disabled = true;
-        btn.innerHTML = '⏳ ГОТОВИМ ФОТО...';
-    } else {
-        loader.style.display = 'none';
-        btn.disabled = false;
-        btn.innerHTML = '📤 ОТПРАВИТЬ ФОТО В АЛЬБОМ';
-    }
-}
-
 function updateCounter() {
     const counter = document.getElementById('photoCount');
     const clearBtn = document.getElementById('clearBtn');
     
     counter.textContent = photos.length;
+    clearBtn.style.display = photos.length > 0 ? 'block' : 'none';
+}
+
+// =========== ПРОСТЫЕ ШАГИ ===========
+function goToStepSimple(step) {
+    // Останавливаем камеру если уходим со 2 шага
+    if (step !== 2 && videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+    }
     
-    if (photos.length > 0) {
-        clearBtn.style.display = 'block';
-    } else {
-        clearBtn.style.display = 'none';
+    // Показываем нужный шаг
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById(`step${step}`).classList.add('active');
+    currentStep = step;
+    
+    // Если переходим к камере, запускаем её
+    if (step === 2) {
+        setTimeout(() => startCameraSimple(), 100);
     }
 }
 
-// =========== ШАГИ ===========
-function goToStep(step) {
-    document.querySelectorAll('.step').forEach(stepEl => {
-        stepEl.classList.remove('active');
-    });
-    
-    document.getElementById(`step${step}`).classList.add('active');
-    currentStep = step;
-}
-
-// Специальная функция для перехода к камере
-function goToCamera() {
-    goToStep(2);
-    setTimeout(() => {
-        startCamera(); // Запускаем камеру после перехода
-    }, 100);
-}
-
-// =========== КАМЕРА ===========
-function switchCamera(type) {
+// =========== ПРОСТАЯ КАМЕРА ===========
+function switchCameraSimple(type) {
     currentCamera = type;
     
-    // Обновляем активные кнопки
+    // Обновляем кнопки
     document.getElementById('backBtn').classList.toggle('active', type === 'back');
     document.getElementById('frontBtn').classList.toggle('active', type === 'front');
     
-    // Перезапускаем камеру с новыми настройками
-    if (videoStream) {
-        startCamera();
-    }
+    // Перезапускаем камеру
+    startCameraSimple();
 }
 
-async function startCamera() {
+async function startCameraSimple() {
     try {
-        // 1. Останавливаем предыдущий поток
+        // Останавливаем старую камеру
         if (videoStream) {
             videoStream.getTracks().forEach(track => track.stop());
-            videoStream = null;
         }
         
-        // 2. Обновляем статус
-        const status = document.getElementById('cameraStatus');
-        status.style.display = 'block';
-        status.innerHTML = '🟡 Запускаем камеру...';
-        status.style.color = '#FF9800';
+        // Скрываем ошибку
+        document.getElementById('cameraError').style.display = 'none';
         
-        // 3. Настройки камеры
+        // Простые настройки
         const constraints = {
             video: {
-                facingMode: currentCamera === 'front' ? 'user' : 'environment',
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
+                facingMode: currentCamera === 'front' ? 'user' : 'environment'
             },
             audio: false
         };
         
-        // 4. Получаем доступ к камере
+        // Получаем камеру
         videoStream = await navigator.mediaDevices.getUserMedia(constraints);
         const video = document.getElementById('video');
         video.srcObject = videoStream;
         
-        // 5. Настраиваем отображение (зеркально для селфи)
+        // Корректируем отображение для селфи
         if (currentCamera === 'front') {
-            video.classList.add('front-camera');
+            video.style.transform = 'scaleX(-1)';
         } else {
-            video.classList.remove('front-camera');
+            video.style.transform = 'scaleX(1)';
         }
-        
-        // 6. Обновляем статус
-        status.innerHTML = '🟢 Камера готова!';
-        status.style.color = '#4CAF50';
-        
-        // 7. Обработка ошибок видео
-        video.onerror = () => {
-            status.innerHTML = '🔴 Ошибка видео';
-            status.style.color = '#f44336';
-        };
-        
-        // 8. Когда видео загрузится
-        video.onloadeddata = () => {
-            status.innerHTML = `🟢 Камера: ${currentCamera === 'front' ? 'Селфи' : 'Задняя'}`;
-            status.style.color = '#4CAF50';
-        };
         
     } catch (error) {
         console.error('Ошибка камеры:', error);
-        const status = document.getElementById('cameraStatus');
-        status.style.display = 'block';
-        status.innerHTML = '🔴 Не удалось включить камеру';
-        status.style.color = '#f44336';
-        
+        document.getElementById('cameraError').style.display = 'block';
         showAlert('Разрешите доступ к камере в настройках браузера', 'error');
+        
+        // Показываем кнопку для повторной попытки
+        const startBtn = document.getElementById('startBtn');
+        startBtn.innerHTML = '🔄 ПОВТОРИТЬ';
+        startBtn.onclick = () => {
+            startBtn.innerHTML = 'НАЧАТЬ ФОТОГРАФИРОВАТЬ';
+            goToStepSimple(2);
+        };
     }
 }
 
-// =========== СДЕЛАТЬ ФОТО ===========
-function takePhoto() {
+// =========== ПРОСТОЕ ФОТО ===========
+function takePhotoSimple() {
     if (!videoStream) {
-        showAlert('Камера не запущена', 'error');
-        startCamera();
+        showAlert('Сначала включите камеру', 'error');
         return;
     }
     
@@ -488,44 +406,35 @@ function takePhoto() {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
     
-    // Для селфи камеры не делаем зеркальное отображение при съемке
-    // (оно уже сделано на видео через CSS)
+    // Рисуем фото
     if (currentCamera === 'front') {
-        // Селфи камера: зеркальное видео, но фото сохраняем нормальным
+        // Для селфи: зеркально
         ctx.save();
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         ctx.restore();
     } else {
-        // Задняя камера: нормально
+        // Для задней камеры: нормально
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     }
     
-    const photoData = canvas.toDataURL('image/jpeg', 0.9);
-    
-    // Сохраняем фото с информацией о камере
-    photos.push({
-        data: photoData,
-        isFront: currentCamera === 'front',
-        timestamp: new Date().getTime()
-    });
+    // Сохраняем фото
+    photos.push(canvas.toDataURL('image/jpeg', 0.9));
     
     // Обновляем галерею
     updateGallery();
     updateCounter();
     
     showAlert('Фото добавлено!', 'success');
-    goToStep(3);
+    goToStepSimple(3);
 }
 
 function updateGallery() {
     const gallery = document.getElementById('photoGallery');
-    
-    // Очищаем галерею
     gallery.innerHTML = '';
     
     if (photos.length === 0) {
@@ -533,39 +442,27 @@ function updateGallery() {
         return;
     }
     
-    // Добавляем каждое фото в галерею
-    photos.forEach((photoObj, index) => {
-        const photoItem = document.createElement('div');
-        photoItem.className = 'photo-item';
+    photos.forEach((photo, index) => {
+        const item = document.createElement('div');
+        item.className = 'photo-item';
         
         const img = document.createElement('img');
-        img.src = photoObj.data;
-        img.alt = `Фото ${index + 1}`;
-        
-        // Для селфи фото добавляем зеркальное отображение в галерее
-        if (photoObj.isFront) {
-            img.classList.add('front-photo');
-        }
+        img.src = photo;
         
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-btn';
         removeBtn.innerHTML = '×';
-        removeBtn.onclick = (e) => {
-            e.stopPropagation();
-            removePhoto(index);
+        removeBtn.onclick = () => {
+            photos.splice(index, 1);
+            updateGallery();
+            updateCounter();
+            showAlert('Фото удалено', 'success');
         };
         
-        photoItem.appendChild(img);
-        photoItem.appendChild(removeBtn);
-        gallery.appendChild(photoItem);
+        item.appendChild(img);
+        item.appendChild(removeBtn);
+        gallery.appendChild(item);
     });
-}
-
-function removePhoto(index) {
-    photos.splice(index, 1);
-    updateGallery();
-    updateCounter();
-    showAlert('Фото удалено', 'success');
 }
 
 function clearAllPhotos() {
@@ -579,82 +476,51 @@ function clearAllPhotos() {
     }
 }
 
-// =========== ОТПРАВКА ФОТО ===========
-function sendPhotos() {
+// =========== ПРОСТАЯ ОТПРАВКА ===========
+function sendPhotosSimple() {
     if (photos.length === 0) {
         showAlert('Сначала сделайте фото!', 'error');
         return;
     }
     
-    showLoader(true);
-    showAlert('Готовим фото...', 'success');
+    // 1. Скачиваем все фото
+    photos.forEach((photo, index) => {
+        const link = document.createElement('a');
+        link.href = photo;
+        link.download = `свадьба_фото_${index + 1}.jpg`;
+        link.click();
+    });
     
-    // 1. Скачать ВСЕ фото на телефон
+    // 2. Показываем сообщение
+    showAlert(`${photos.length} фото скачаны!`, 'success');
+    
+    // 3. Открываем Google Форму
     setTimeout(() => {
-        photos.forEach((photoObj, index) => {
-            const link = document.createElement('a');
-            link.href = photoObj.data;
-            link.download = `свадьба_${photoObj.isFront ? 'селфи_' : ''}фото_${index + 1}.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
+        window.open('https://docs.google.com/forms/d/e/1FAIpQLSe6hWt8eu_0qSCi94L7T8GFMluMptkKHRng4Eu4mhapmqAVRA/viewform', '_blank');
         
-        showLoader(false);
+        // 4. Переходим к успеху
+        goToStepSimple(4);
         
-        // 2. Простая инструкция
-        const instruction = `
-✅ ${photos.length} фото скачаны на телефон!
-
-📤 Теперь:
-1. Нажмите "ОК"
-2. Загрузите фото в форму
-3. Нажмите "Отправить"
-
-Готово! 🎉
-        `;
-        
-        if (confirm(instruction)) {
-            // 3. Открыть Google Форму
-            window.open('https://docs.google.com/forms/d/e/1FAIpQLSe6hWt8eu_0qSCi94L7T8GFMluMptkKHRng4Eu4mhapmqAVRA/viewform', '_blank');
-            
-            // 4. Перейти к успеху
-            goToStep(4);
-            
-            // 5. Очистить фото через 3 секунды
-            setTimeout(() => {
-                photos = [];
-                updateGallery();
-                updateCounter();
-            }, 3000);
-        }
-    }, 1000);
+        // 5. Очищаем фото через 2 секунды
+        setTimeout(() => {
+            photos = [];
+            updateGallery();
+            updateCounter();
+        }, 2000);
+    }, 500);
 }
 
-// =========== ЗАГРУЗКА ===========
+// =========== ПРОВЕРКА ПРИ ЗАГРУЗКЕ ===========
 window.onload = function() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showAlert('Используйте Chrome или Safari', 'error');
+        showAlert('Используйте Chrome или Safari на телефоне', 'error');
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('startBtn').innerHTML = '📵 НЕ ПОДДЕРЖИВАЕТСЯ';
     }
     
     updateCounter();
     updateGallery();
 };
-
-// Очистка при закрытии
-window.addEventListener('beforeunload', () => {
-    if (videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-    }
-});
-
-// Автоматическая остановка камеры при уходе со шага 2
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden && videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-        videoStream = null;
-    }
-});
 </script>
 </body>
 </html>
