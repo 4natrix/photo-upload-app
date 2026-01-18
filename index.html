@@ -161,13 +161,24 @@
                 allPhotos.push(photoData);
                 localStorage.setItem('wedding_photos', JSON.stringify(allPhotos));
                 
-                // Создаём ссылку для просмотра
-                const viewUrl = window.location.origin + '/view.html#' + photoId;
-                
-                // Если на GitHub Pages
-                if (window.location.hostname.includes('github.io')) {
-                    const viewUrl = window.location.href.replace('index.html', 'view.html') + '#' + photoId;
-                }
+               // Создаём ссылку для просмотра
+let viewUrl;
+
+if (window.location.hostname.includes('github.io')) {
+    // Для GitHub Pages
+    const baseUrl = window.location.href.split('/').slice(0, -1).join('/');
+    viewUrl = baseUrl + '/view.html#' + photoId;
+} else {
+    // Для локального использования
+    viewUrl = window.location.href.replace('index.html', 'view.html') + '#' + photoId;
+}
+
+// Если нет index.html в URL
+if (!window.location.href.includes('index.html')) {
+    viewUrl = window.location.origin + '/view.html#' + photoId;
+}
+
+console.log('Ссылка для просмотра:', viewUrl);
                 
                 // УСПЕХ
                 showStatus('✅ Фото сохранено!', 'success');
@@ -222,3 +233,4 @@
     </script>
 </body>
 </html>
+
