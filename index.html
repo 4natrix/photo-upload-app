@@ -316,7 +316,7 @@
         }
         
         // ==================== ОТПРАВКА ФОТО ====================
-       async function sendPhoto() {
+      async function sendPhoto() {
     if (!photoBlob) {
         showMessage('❌ Сначала сделайте фото!', 'error');
         return;
@@ -337,13 +337,10 @@
             reader.readAsDataURL(photoBlob);
         });
         
-        console.log('✅ Фото конвертировано, размер base64:', photoBase64.length);
-        
-        // Проверяем URL
-        console.log('📡 URL для отправки:', GALLERY_URL);
+        console.log('✅ Фото конвертировано');
         
         // 2. Отправляем в Google Apps Script
-        showMessage('📤 Подключаемся к серверу...', 'success');
+        showMessage('📤 Сохраняем в галерею...', 'success');
         
         const requestData = {
             name: guestName,
@@ -352,73 +349,30 @@
             photoBase64: photoBase64
         };
         
-        console.log('📦 Данные для отправки:', {
-            name: guestName,
-            timestamp: timestamp,
-            device: navigator.userAgent.substring(0, 100),
-            photoSize: photoBase64.length
+        console.log('Отправляем на:', GALLERY_URL);
+        
+        // Вариант 1: С cors mode
+        const response = await fetch(GALLERY_URL, {
+            method: 'POST',
+            mode: 'cors', // ← ВАЖНО: меняем на cors!
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
         });
         
-        // Отправляем запрос с таймаутом
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 секунд
+        console.log('Ответ получен, статус:', response.status);
         
-        let response;
-        try {
-            response = await fetch(GALLERY_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestData),
-                signal: controller.signal
-            });
-            
-            clearTimeout(timeoutId);
-            
-        } catch (fetchError) {
-            console.error('❌ Ошибка fetch:', fetchError);
-            
-            if (fetchError.name === 'AbortError') {
-                throw new Error('Таймаут: сервер не отвечает 10 секунд');
-            } else if (fetchError.message.includes('Failed to fetch')) {
-                throw new Error('Проблемы с интернет-соединением или CORS');
-            } else {
-                throw fetchError;
-            }
-        }
+        const result = await response.json();
+        console.log('Результат:', result);
         
-        console.log('✅ Ответ получен, статус:', response.status, response.statusText);
-        
-        // Пробуем прочитать ответ
-        let responseText;
-        try {
-            responseText = await response.text();
-            console.log('📨 Ответ сервера (текст):', responseText.substring(0, 200));
-        } catch (textError) {
-            console.error('❌ Не удалось прочитать ответ:', textError);
-            throw new Error('Сервер вернул пустой ответ');
-        }
-        
-        // Парсим JSON
-        let result;
-        try {
-            result = JSON.parse(responseText);
-            console.log('✅ Ответ парсирован:', result);
-        } catch (jsonError) {
-            console.error('❌ Ошибка парсинга JSON:', jsonError);
-            console.log('Сырой ответ:', responseText);
-            throw new Error('Сервер вернул некорректный ответ: ' + responseText.substring(0, 100));
-        }
-        
-        // Проверяем успех
         if (!result.success) {
-            throw new Error(result.error || result.message || 'Неизвестная ошибка сервера');
+            throw new Error(result.error || 'Ошибка сервера');
         }
         
-        console.log('✅ Фото сохранено! Ссылка:', result.url);
+        console.log('✅ Фото сохранено:', result.url);
         
-        // 3. Отправляем уведомление на почту
+        // 3. Отправляем email
         showMessage('📨 Отправляем уведомление...', 'success');
         
         try {
@@ -431,7 +385,6 @@
             emailFormData.append('📅 Дата и время', timestamp);
             emailFormData.append('🔗 Ссылка на фото', result.url);
             emailFormData.append('📱 Устройство', navigator.userAgent.substring(0, 50));
-            emailFormData.append('📊 Номер записи', '#' + (result.row || ''));
             
             await fetch(`https://formsubmit.co/ajax/${FORM_SUBMIT_EMAIL}`, {
                 method: 'POST',
@@ -443,41 +396,64 @@
             
         } catch (emailError) {
             console.warn('⚠️ Ошибка email:', emailError);
-            // Продолжаем, даже если email не отправился
         }
         
         // УСПЕХ
-        showMessage('🎉 Фото отправлено! Проверьте почту.', 'success');
+        showMessage('🎉 Фото отправлено! Ссылка: ' + result.url.substring(0, 50) + '...', 'success');
         
         // Показываем ссылку
         setTimeout(() => {
-            alert(`✅ Фото успешно сохранено!\n\nСсылка: ${result.url}\n\nНомер записи: #${result.row || '?'}`);
+            alert(`✅ Фото успешно сохранено!\n\nСсылка: ${result.url}\n\nНомер записи: #${result.row || ''}`);
         }, 500);
         
-        // Сбрасываем форму через 3 секунды
+        // Сбрасываем форму
         setTimeout(() => {
             resetForm();
             showMessage('📸 Готово для следующего фото!', 'success');
         }, 3000);
         
     } catch (error) {
-        console.error('❌ Критическая ошибка:', error);
+        console.error('❌ Ошибка:', error);
         
-        let userMessage = error.message;
-        
-        // Полезные сообщения для пользователя
-        if (error.message.includes('CORS')) {
-            userMessage = 'Проблема с настройками сервера (CORS)';
-        } else if (error.message.includes('интернет')) {
-            userMessage = 'Проверьте интернет-соединение';
-        } else if (error.message.includes('таймаут')) {
-            userMessage = 'Сервер долго не отвечает. Попробуйте позже';
-        } else if (error.message.includes('Failed to fetch')) {
-            userMessage = 'Не удалось соединиться с сервером';
+        // Если CORS ошибка, пробуем вариант с no-cors
+        if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+            console.log('Пробуем no-cors режим...');
+            
+            try {
+                // Вариант 2: С no-cors mode (старый способ)
+                await fetch(GALLERY_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: guestName,
+                        timestamp: timestamp,
+                        device: navigator.userAgent.substring(0, 100),
+                        photoBase64: await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.readAsDataURL(photoBlob);
+                        })
+                    })
+                });
+                
+                showMessage('✅ Фото отправлено (no-cors режим)', 'success');
+                
+                setTimeout(() => {
+                    resetForm();
+                    showMessage('📸 Готово!', 'success');
+                }, 3000);
+                
+                return;
+                
+            } catch (noCorsError) {
+                console.error('❌ No-cors тоже не работает:', noCorsError);
+            }
         }
         
-        showMessage(`❌ ${userMessage}`, 'error');
-        
+        showMessage(`❌ ${error.message}`, 'error');
         sendBtn.disabled = false;
         sendBtn.innerHTML = '<span>✈️</span> Отправить';
     }
@@ -510,4 +486,5 @@
     </script>
 </body>
 </html>
+
 
