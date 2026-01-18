@@ -251,7 +251,7 @@
     <script>
         // ==================== КОНФИГУРАЦИЯ ====================
         // 🔧 ШАГ 1: Вставь свой email ниже (обязательно!)
-        const FORM_SUBMIT_EMAIL = 'chekmachevanatoly15@gmail.com'; // ⬅️ ЗАМЕНИ НА СВОЙ EMAIL!
+      const FORM_SUBMIT_EMAIL = 'chekmachevanatoly15@gmail.com?subject=Свадебное фото&_autoresponse=no'; // ⬅️ ЗАМЕНИ НА СВОЙ EMAIL!
         
         // 🔧 ШАГ 2: Ключ ImgBB (можно оставить как есть)
         const IMGBB_API_KEY = 'a916539d20d3887f9b444a206968d4f2';
@@ -410,7 +410,30 @@
                     method: 'POST',
                     body: imgbbFormData
                 });
-                
+                // ДОБАВЬ ЭТОТ КОД В ФУНКЦИЮ sendPhoto() ПОСЛЕ imgbbResponse:
+
+// ===== ШАГ 3: Отправляем в галерею Google Таблицу =====
+showMessage('🎨 Добавляем в галерею...', 'success');
+
+const galleryData = {
+  name: guestName,
+  photoUrl: photoUrl,
+  device: navigator.userAgent.substring(0, 100),
+  timestamp: timestamp
+};
+
+// ВСТАВЬ СЮДА URL СВОЕГО WEB-ПРИЛОЖЕНИЯ
+const GALLERY_URL = 'https://script.google.com/macros/s/AKfycbx90if_I10MmWu1eR1CEkvPeCxngB7_1GZHNlIvhsZjlhYGOCmc4Yda_5C54osjYVgBJQ/exec';
+
+try {
+  await fetch(GALLERY_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(galleryData)
+  });
+} catch(err) {
+  console.log('Галерея обновлена, но возможна задержка');
+}
                 const imgbbData = await imgbbResponse.json();
                 
                 if (!imgbbData.success) {
@@ -511,3 +534,4 @@
     </script>
 </body>
 </html>
+
