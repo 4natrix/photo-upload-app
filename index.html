@@ -35,6 +35,9 @@
             align-items: center;
             padding: 20px;
             color: var(--light);
+            transition: var(--transition);
+            position: relative;
+            overflow-x: hidden;
         }
 
         @keyframes fadeInUp {
@@ -45,6 +48,22 @@
             to {
                 opacity: 1;
                 transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
             }
         }
 
@@ -61,10 +80,11 @@
 
         @keyframes cameraFlash {
             0% { opacity: 0; }
-            50% { opacity: 1; }
+            50% { opacity: 0.8; }
             100% { opacity: 0; }
         }
 
+        /* Основной контейнер */
         .container {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -76,8 +96,212 @@
             text-align: center;
             animation: fadeInUp 0.8s ease-out;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: var(--transition);
+            z-index: 10;
+            position: relative;
         }
 
+        .fullscreen-mode .container {
+            transform: scale(0.95);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Полноэкранная камера */
+        .fullscreen-camera {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .fullscreen-camera.active {
+            display: flex;
+        }
+
+        .camera-view {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .camera-view video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(transparent calc(50% - 1px), rgba(255,255,255,0.1) calc(50% - 1px), rgba(255,255,255,0.1) calc(50% + 1px), transparent calc(50% + 1px)),
+                linear-gradient(90deg, transparent calc(50% - 1px), rgba(255,255,255,0.1) calc(50% - 1px), rgba(255,255,255,0.1) calc(50% + 1px), transparent calc(50% + 1px));
+        }
+
+        .camera-frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            height: 70%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.7);
+            pointer-events: none;
+        }
+
+        .camera-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            padding: 20px;
+            z-index: 3;
+            animation: slideUp 0.5s ease-out 0.3s both;
+        }
+
+        .camera-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .camera-btn::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .camera-btn:hover::after {
+            opacity: 1;
+        }
+
+        .camera-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .capture-btn {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border: 4px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .capture-btn:hover {
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+
+        .capture-btn i {
+            color: #333;
+        }
+
+        .capture-btn:active {
+            transform: scale(0.95);
+        }
+
+        .close-camera {
+            position: absolute;
+            top: 40px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 4;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-camera:hover {
+            background: rgba(0, 0, 0, 0.7);
+            transform: rotate(90deg);
+        }
+
+        .camera-label-fullscreen {
+            position: absolute;
+            top: 40px;
+            left: 30px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(5px);
+            z-index: 4;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .flash-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .flash-effect.active {
+            animation: cameraFlash 0.3s;
+        }
+
+        /* Остальные стили как были */
         .header {
             margin-bottom: 30px;
             position: relative;
@@ -191,38 +415,36 @@
             line-height: 1.4;
         }
 
-        .camera-section {
-            margin: 30px 0;
-            position: relative;
-        }
-
-        .camera-box {
+        /* Миниатюрная камера на главной */
+        .camera-preview {
             width: 100%;
-            height: 350px;
+            height: 250px;
             background: #000;
             border-radius: 18px;
             overflow: hidden;
             position: relative;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-            transform: scale(1);
+            margin: 25px 0;
+            cursor: pointer;
             transition: var(--transition);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
-        .camera-box:hover {
-            transform: scale(1.01);
+        .camera-preview:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
         }
 
-        video {
+        .camera-preview video {
             width: 100%;
             height: 100%;
             object-fit: cover;
             filter: brightness(1.05) contrast(1.1);
         }
 
-        .camera-label {
+        .camera-preview-label {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            bottom: 20px;
+            left: 20px;
             background: linear-gradient(135deg, rgba(10, 61, 47, 0.9), rgba(26, 92, 72, 0.9));
             color: white;
             padding: 10px 20px;
@@ -232,8 +454,29 @@
             align-items: center;
             gap: 10px;
             backdrop-filter: blur(5px);
-            z-index: 10;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .camera-prompt {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        .camera-prompt i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+            color: var(--accent);
         }
 
         .controls {
@@ -350,22 +593,6 @@
             transform: scale(1);
         }
 
-        .flash {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: white;
-            opacity: 0;
-            pointer-events: none;
-            border-radius: 18px;
-        }
-
-        .flash.active {
-            animation: cameraFlash 0.3s;
-        }
-
         .status {
             padding: 25px;
             border-radius: 18px;
@@ -451,6 +678,37 @@
             animation: pulse 1.5s infinite;
         }
 
+        @media (max-width: 768px) {
+            .camera-controls {
+                gap: 20px;
+                padding: 15px;
+            }
+            
+            .camera-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 20px;
+            }
+            
+            .capture-btn {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .camera-label-fullscreen,
+            .close-camera {
+                top: 20px;
+            }
+            
+            .camera-label-fullscreen {
+                left: 20px;
+            }
+            
+            .close-camera {
+                right: 20px;
+            }
+        }
+
         @media (max-width: 600px) {
             .container { 
                 padding: 25px; 
@@ -468,8 +726,8 @@
                 height: 50px;
             }
             
-            .camera-box { 
-                height: 280px; 
+            .camera-preview { 
+                height: 200px; 
             }
             
             .btn {
@@ -493,10 +751,26 @@
                 width: 100%;
                 max-width: 280px;
             }
+            
+            .camera-controls {
+                gap: 10px;
+            }
+            
+            .camera-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 18px;
+            }
+            
+            .capture-btn {
+                width: 60px;
+                height: 60px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Основной контейнер -->
     <div class="container">
         <div class="header">
             <h1>
@@ -513,45 +787,48 @@
             <div class="steps">
                 <div class="step">
                     <div class="step-number">1</div>
-                    <div class="step-text">Разрешите доступ к камере</div>
+                    <div class="step-text">Нажмите на экран камеры ниже</div>
                 </div>
                 <div class="step">
                     <div class="step-number">2</div>
-                    <div class="step-text">Смените камеру для селфи или окружения</div>
+                    <div class="step-text">Откроется полноэкранный режим съемки</div>
                 </div>
                 <div class="step">
                     <div class="step-number">3</div>
-                    <div class="step-text">Нажмите на кнопку "Снять фото"</div>
+                    <div class="step-text">Смените камеру для селфи или окружения</div>
                 </div>
                 <div class="step">
                     <div class="step-number">4</div>
-                    <div class="step-text">Отправьте фото в наш альбом</div>
+                    <div class="step-text">Нажмите большую круглую кнопку для снимка</div>
                 </div>
             </div>
         </div>
         
-        <div class="camera-section">
-            <div class="camera-box">
-                <div class="flash" id="flash"></div>
-                <video id="video" autoplay playsinline></video>
-                <div class="camera-label" id="cameraLabel">
-                    <i class="fas fa-camera"></i>
-                    <span>Задняя камера</span>
-                </div>
+        <!-- Миниатюрная камера-превью -->
+        <div class="camera-preview" id="openCameraBtn">
+            <div class="camera-prompt">
+                <i class="fas fa-expand-alt"></i>
+                <p>Нажмите для открытия камеры<br>в полноэкранном режиме</p>
+            </div>
+            <video id="previewVideo" autoplay playsinline></video>
+            <div class="camera-preview-label">
+                <i class="fas fa-camera"></i>
+                <span>Нажмите для съемки</span>
             </div>
         </div>
         
         <div class="controls">
-            <button class="btn btn-secondary" id="switchBtn">
+            <button class="btn btn-secondary" id="switchPreviewBtn">
                 <i class="fas fa-sync-alt"></i>
                 <span>Сменить камеру</span>
             </button>
-            <button class="btn btn-primary" id="captureBtn">
+            <button class="btn btn-primary" id="quickCaptureBtn">
                 <i class="fas fa-camera"></i>
-                <span>Снять фото</span>
+                <span>Быстрая съемка</span>
             </button>
         </div>
         
+        <!-- Область предпросмотра сфотографированного -->
         <div class="preview" id="preview">
             <div class="preview-header">
                 <i class="fas fa-eye fa-lg" style="color: var(--primary);"></i>
@@ -561,7 +838,7 @@
             <div class="controls" style="margin-top: 25px;">
                 <button class="btn btn-danger" id="retakeBtn">
                     <i class="fas fa-redo"></i>
-                    <span>Переснять</span>
+                    <span>Снять еще</span>
                 </button>
                 <button class="btn btn-primary btn-shimmer" id="sendBtn">
                     <i class="fas fa-paper-plane"></i>
@@ -606,14 +883,57 @@
         </footer>
     </div>
 
+    <!-- Полноэкранная камера -->
+    <div class="fullscreen-camera" id="fullscreenCamera">
+        <div class="camera-view">
+            <video id="fullscreenVideo" autoplay playsinline></video>
+            <div class="camera-overlay">
+                <div class="grid-overlay"></div>
+                <div class="camera-frame"></div>
+            </div>
+            <div class="flash-effect" id="fullscreenFlash"></div>
+            
+            <div class="camera-label-fullscreen" id="fullscreenCameraLabel">
+                <i class="fas fa-camera"></i>
+                <span>Задняя камера</span>
+            </div>
+            
+            <button class="close-camera" id="closeCameraBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="camera-controls">
+            <button class="camera-btn" id="switchCameraFullscreen">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            
+            <button class="camera-btn capture-btn" id="captureFullscreen">
+                <i class="fas fa-camera"></i>
+            </button>
+            
+            <button class="camera-btn" id="toggleGrid" title="Сетка">
+                <i class="fas fa-th"></i>
+            </button>
+        </div>
+    </div>
+
     <script>
         // URL вашего Google Apps Script веб-приложения
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxx4E9HieabFOlY1hD_p5oDL1gPrXWxoGfUsW-y6kSQyDp2FqgGNsS4fghQmFoN_xBH0g/exec';
         
         // Элементы
-        const video = document.getElementById('video');
-        const captureBtn = document.getElementById('captureBtn');
-        const switchBtn = document.getElementById('switchBtn');
+        const body = document.body;
+        const container = document.querySelector('.container');
+        const previewVideo = document.getElementById('previewVideo');
+        const fullscreenVideo = document.getElementById('fullscreenVideo');
+        const fullscreenCamera = document.getElementById('fullscreenCamera');
+        const openCameraBtn = document.getElementById('openCameraBtn');
+        const closeCameraBtn = document.getElementById('closeCameraBtn');
+        const switchPreviewBtn = document.getElementById('switchPreviewBtn');
+        const switchCameraFullscreen = document.getElementById('switchCameraFullscreen');
+        const quickCaptureBtn = document.getElementById('quickCaptureBtn');
+        const captureFullscreen = document.getElementById('captureFullscreen');
         const sendBtn = document.getElementById('sendBtn');
         const retakeBtn = document.getElementById('retakeBtn');
         const preview = document.getElementById('preview');
@@ -621,29 +941,33 @@
         const loading = document.getElementById('loading');
         const successMsg = document.getElementById('successMsg');
         const errorMsg = document.getElementById('errorMsg');
-        const cameraLabel = document.getElementById('cameraLabel');
-        const flash = document.getElementById('flash');
-        const cameraLabelText = cameraLabel.querySelector('span');
-        const cameraLabelIcon = cameraLabel.querySelector('i');
+        const fullscreenCameraLabel = document.getElementById('fullscreenCameraLabel');
+        const fullscreenFlash = document.getElementById('fullscreenFlash');
+        const toggleGrid = document.getElementById('toggleGrid');
+        const gridOverlay = document.querySelector('.grid-overlay');
         
         let currentStream = null;
         let currentFacingMode = 'environment';
         let capturedPhoto = null;
         let photoCount = 0;
+        let isGridVisible = true;
         
         // Функция для обновления иконки камеры
-        function updateCameraLabel() {
+        function updateCameraLabel(labelElement) {
+            const icon = labelElement.querySelector('i');
+            const text = labelElement.querySelector('span');
+            
             if (currentFacingMode === 'environment') {
-                cameraLabelText.textContent = 'Задняя камера';
-                cameraLabelIcon.className = 'fas fa-camera';
+                text.textContent = 'Задняя камера';
+                icon.className = 'fas fa-camera';
             } else {
-                cameraLabelText.textContent = 'Фронтальная камера';
-                cameraLabelIcon.className = 'fas fa-user';
+                text.textContent = 'Фронтальная камера';
+                icon.className = 'fas fa-user';
             }
         }
         
-        // Запуск камеры с анимацией
-        async function startCamera(facingMode) {
+        // Запуск камеры
+        async function startCamera(videoElement, facingMode) {
             if (currentStream) {
                 currentStream.getTracks().forEach(track => track.stop());
             }
@@ -659,87 +983,113 @@
             };
             
             try {
-                // Анимация переключения камеры
-                switchBtn.classList.add('btn-shimmer');
-                setTimeout(() => switchBtn.classList.remove('btn-shimmer'), 1000);
-                
                 currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-                video.srcObject = currentStream;
+                videoElement.srcObject = currentStream;
                 
-                // Обновляем метку
-                updateCameraLabel();
-                
-                // Скрываем превью и сообщения
-                preview.style.display = 'none';
-                successMsg.style.display = 'none';
-                errorMsg.style.display = 'none';
-                
-                console.log(`Камера запущена: ${facingMode}`);
-                
+                return true;
             } catch (err) {
                 console.error('Ошибка камеры:', err);
-                
-                // Плавное сообщение об ошибке
-                errorMsg.querySelector('strong').textContent = 'Ошибка доступа к камере';
-                errorMsg.querySelector('p').textContent = 'Пожалуйста, разрешите доступ к камере и обновите страницу';
-                errorMsg.style.display = 'flex';
-                
-                setTimeout(() => {
-                    errorMsg.style.display = 'none';
-                }, 5000);
+                return false;
             }
         }
         
-        // Инициализация с плавным появлением
-        document.addEventListener('DOMContentLoaded', () => {
+        // Инициализация миниатюрной камеры
+        async function initializePreviewCamera() {
+            const success = await startCamera(previewVideo, currentFacingMode);
+            if (!success) {
+                showError('Ошибка доступа к камере', 'Пожалуйста, разрешите доступ к камере');
+            }
+        }
+        
+        // Показать ошибку
+        function showError(title, message) {
+            errorMsg.querySelector('strong').textContent = title;
+            errorMsg.querySelector('p').textContent = message;
+            errorMsg.style.display = 'flex';
+            
             setTimeout(() => {
-                startCamera(currentFacingMode);
-            }, 500);
-        });
+                errorMsg.style.display = 'none';
+            }, 5000);
+        }
         
-        // Переключение камеры с анимацией
-        switchBtn.addEventListener('click', () => {
-            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
-            startCamera(currentFacingMode);
-        });
-        
-        // Съемка фото с анимацией вспышки
-        captureBtn.addEventListener('click', () => {
-            if (!currentStream) {
-                errorMsg.querySelector('strong').textContent = 'Камера не доступна';
-                errorMsg.querySelector('p').textContent = 'Пожалуйста, разрешите доступ к камере';
-                errorMsg.style.display = 'flex';
+        // Открыть полноэкранную камеру
+        async function openFullscreenCamera() {
+            // Переключаем режим
+            body.classList.add('fullscreen-mode');
+            fullscreenCamera.classList.add('active');
+            
+            // Запускаем камеру в полноэкранном режиме
+            const success = await startCamera(fullscreenVideo, currentFacingMode);
+            if (!success) {
+                showError('Ошибка камеры', 'Не удалось получить доступ к камере');
+                closeFullscreenCamera();
                 return;
             }
             
+            // Обновляем метку
+            updateCameraLabel(fullscreenCameraLabel);
+            
+            // Блокируем ориентацию на мобильных
+            if (screen.orientation && screen.orientation.lock) {
+                try {
+                    await screen.orientation.lock('landscape');
+                } catch (e) {
+                    console.log('Ориентация не заблокирована:', e);
+                }
+            }
+        }
+        
+        // Закрыть полноэкранную камеру
+        function closeFullscreenCamera() {
+            body.classList.remove('fullscreen-mode');
+            fullscreenCamera.classList.remove('active');
+            
+            // Разблокируем ориентацию
+            if (screen.orientation && screen.orientation.unlock) {
+                screen.orientation.unlock();
+            }
+            
+            // Возвращаемся к миниатюрной камере
+            startCamera(previewVideo, currentFacingMode);
+        }
+        
+        // Сделать фото в полноэкранном режиме
+        function capturePhotoFullscreen() {
             // Анимация вспышки
-            flash.classList.add('active');
-            setTimeout(() => flash.classList.remove('active'), 300);
+            fullscreenFlash.classList.add('active');
+            setTimeout(() => fullscreenFlash.classList.remove('active'), 300);
             
             // Анимация кнопки
-            captureBtn.style.transform = 'scale(0.95)';
+            captureFullscreen.style.transform = 'scale(0.9)';
             setTimeout(() => {
-                captureBtn.style.transform = '';
+                captureFullscreen.style.transform = '';
             }, 200);
             
             // Создаем canvas для фото
             const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+            canvas.width = fullscreenVideo.videoWidth;
+            canvas.height = fullscreenVideo.videoHeight;
             const ctx = canvas.getContext('2d');
             
-            // ИСПРАВЛЕНО: Убрано зеркалирование для фронтальной камеры
-            // Оставляем естественное отображение
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            // Рисуем видео на canvas
+            ctx.drawImage(fullscreenVideo, 0, 0, canvas.width, canvas.height);
             
             // Сохраняем фото
             capturedPhoto = canvas.toDataURL('image/jpeg', 0.95);
             
-            // Показываем превью с плавной анимацией
+            // Закрываем полноэкранную камеру
+            closeFullscreenCamera();
+            
+            // Показываем превью фото
+            setTimeout(() => {
+                showPhotoPreview();
+            }, 500);
+        }
+        
+        // Показать превью фото
+        function showPhotoPreview() {
             photoPreview.src = capturedPhoto;
             preview.style.display = 'block';
-            
-            // Увеличиваем счетчик
             photoCount++;
             
             // Плавная прокрутка к превью
@@ -749,28 +1099,12 @@
                     block: 'center' 
                 });
             }, 300);
-        });
-        
-        // Переснять фото
-        retakeBtn.addEventListener('click', () => {
-            preview.style.display = 'none';
-            capturedPhoto = null;
-            
-            // Анимация возврата к камере
-            setTimeout(() => {
-                document.querySelector('.camera-section').scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center' 
-                });
-            }, 200);
-        });
+        }
         
         // Отправка фото через Google Apps Script
-        sendBtn.addEventListener('click', async () => {
+        async function sendPhoto() {
             if (!capturedPhoto) {
-                errorMsg.querySelector('strong').textContent = 'Сначала сделайте фото';
-                errorMsg.querySelector('p').textContent = 'Нажмите кнопку "Снять фото"';
-                errorMsg.style.display = 'flex';
+                showError('Сначала сделайте фото', 'Нажмите кнопку "Снять фото"');
                 return;
             }
             
@@ -783,7 +1117,7 @@
             
             try {
                 // Отправляем на Google Apps Script
-                const response = await fetch(SCRIPT_URL, {
+                await fetch(SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: {
@@ -797,28 +1131,20 @@
                     })
                 });
                 
-                // Имитация успешной отправки (скрипт уже настроен)
+                // Успешная отправка
                 setTimeout(() => {
                     loading.style.display = 'none';
                     successMsg.style.display = 'flex';
                     capturedPhoto = null;
                     sendBtn.disabled = false;
                     
-                    // Обновляем счетчик в успешном сообщении
+                    // Обновляем счетчик
                     const successText = successMsg.querySelector('p');
                     successText.textContent = `Фото #${photoCount} добавлено в свадебный альбом`;
                     
-                    // Скрываем успешное сообщение через 5 секунд
+                    // Скрываем успешное сообщение
                     setTimeout(() => {
                         successMsg.style.display = 'none';
-                        
-                        // Возвращаемся к камере
-                        setTimeout(() => {
-                            document.querySelector('.camera-section').scrollIntoView({ 
-                                behavior: 'smooth', 
-                                block: 'center' 
-                            });
-                        }, 300);
                     }, 5000);
                     
                 }, 1500);
@@ -827,17 +1153,77 @@
                 console.error('Ошибка:', error);
                 
                 loading.style.display = 'none';
-                errorMsg.querySelector('strong').textContent = 'Ошибка соединения';
-                errorMsg.querySelector('p').textContent = 'Проверьте интернет и попробуйте снова';
-                errorMsg.style.display = 'flex';
+                showError('Ошибка соединения', 'Проверьте интернет и попробуйте снова');
                 sendBtn.disabled = false;
-                
-                // Показываем превью снова
                 preview.style.display = 'block';
-                
-                setTimeout(() => {
-                    errorMsg.style.display = 'none';
-                }, 5000);
+            }
+        }
+        
+        // Быстрая съемка без полноэкранного режима
+        async function quickCapture() {
+            if (!currentStream) {
+                showError('Камера не доступна', 'Пожалуйста, разрешите доступ к камере');
+                return;
+            }
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = previewVideo.videoWidth;
+            canvas.height = previewVideo.videoHeight;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.drawImage(previewVideo, 0, 0, canvas.width, canvas.height);
+            capturedPhoto = canvas.toDataURL('image/jpeg', 0.95);
+            
+            showPhotoPreview();
+        }
+        
+        // Переключение камеры
+        function switchCamera() {
+            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+            
+            // Обновляем все активные видео
+            if (previewVideo.srcObject) {
+                startCamera(previewVideo, currentFacingMode);
+            }
+            if (fullscreenVideo.srcObject) {
+                startCamera(fullscreenVideo, currentFacingMode);
+                updateCameraLabel(fullscreenCameraLabel);
+            }
+        }
+        
+        // Переключение сетки
+        function toggleGridVisibility() {
+            isGridVisible = !isGridVisible;
+            gridOverlay.style.opacity = isGridVisible ? '1' : '0';
+            toggleGrid.innerHTML = isGridVisible ? '<i class="fas fa-th"></i>' : '<i class="fas fa-th-large"></i>';
+        }
+        
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                initializePreviewCamera();
+            }, 500);
+        });
+        
+        // Обработчики событий
+        openCameraBtn.addEventListener('click', openFullscreenCamera);
+        closeCameraBtn.addEventListener('click', closeFullscreenCamera);
+        switchPreviewBtn.addEventListener('click', switchCamera);
+        switchCameraFullscreen.addEventListener('click', switchCamera);
+        quickCaptureBtn.addEventListener('click', quickCapture);
+        captureFullscreen.addEventListener('click', capturePhotoFullscreen);
+        sendBtn.addEventListener('click', sendPhoto);
+        retakeBtn.addEventListener('click', () => {
+            preview.style.display = 'none';
+            capturedPhoto = null;
+            openFullscreenCamera();
+        });
+        toggleGrid.addEventListener('click', toggleGridVisibility);
+        
+        // Закрытие полноэкранной камеры по Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && fullscreenCamera.classList.contains('active')) {
+                closeFullscreenCamera();
             }
         });
         
@@ -852,17 +1238,12 @@
         window.addEventListener('orientationchange', () => {
             setTimeout(() => {
                 if (currentStream) {
-                    startCamera(currentFacingMode);
+                    startCamera(previewVideo, currentFacingMode);
                 }
             }, 300);
         });
         
-        // Плавное появление элементов при прокрутке
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-        
+        // Плавное появление элементов
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -870,10 +1251,12 @@
                     entry.target.style.transform = 'translateY(0)';
                 }
             });
-        }, observerOptions);
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        });
         
-        // Наблюдаем за элементами с анимацией
-        document.querySelectorAll('.step, .camera-box, .btn').forEach(el => {
+        document.querySelectorAll('.step, .camera-preview, .btn').forEach(el => {
             el.style.opacity = '0';
             el.style.transform = 'translateY(20px)';
             el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
