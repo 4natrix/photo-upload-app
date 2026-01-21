@@ -74,6 +74,11 @@
             100% { transform: scale(1); }
         }
 
+        @keyframes cameraSwitch {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .container {
             background: var(--ivory);
             border-radius: 28px;
@@ -488,7 +493,7 @@
 
         .camera-view {
             width: 100%;
-            height: 400px;
+            height: 450px;
             background: #000;
             position: relative;
             overflow: hidden;
@@ -500,74 +505,59 @@
             object-fit: cover;
         }
 
-        .camera-controls {
-            padding: 35px 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-            background: var(--ivory-dark);
-        }
-
-        .camera-switch {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-
-        .camera-option {
-            flex: 1;
-            max-width: 200px;
-        }
-
-        .camera-btn {
-            width: 100%;
-            padding: 20px;
-            border: 2px solid var(--gold-light);
-            background: white;
-            border-radius: 18px;
-            font-size: 1.1rem;
-            color: var(--deep-green);
+        /* Кнопка смены камеры в правом верхнем углу */
+        .camera-switch-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.8rem;
             cursor: pointer;
             transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
-            font-weight: 500;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            z-index: 100;
         }
 
-        .camera-btn.active {
-            background: linear-gradient(135deg, var(--sage-green), var(--forest-green));
-            color: white;
-            border-color: var(--sage-green);
-            box-shadow: 0 8px 25px rgba(45, 99, 87, 0.4);
+        .camera-switch-button:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: rotate(180deg);
+            border-color: var(--gold);
         }
 
-        .camera-btn:hover:not(.active) {
-            border-color: var(--mint-green);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+        .camera-switch-button:active {
+            animation: cameraSwitch 0.5s;
         }
 
-        /* КНОПКА ЗАТВОРА - ОЧЕНЬ ЗАМЕТНАЯ! */
-        .capture-section {
+        /* Панель управления камерой снизу */
+        .camera-controls-bottom {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            padding: 0 30px;
+            z-index: 100;
             display: flex;
-            flex-direction: column;
-            gap: 25px;
+            justify-content: center;
             align-items: center;
-            position: relative;
         }
 
-        .capture-button {
-            width: 120px;
-            height: 120px;
+        /* КНОПКА ЗАТВОРА ПОСЕРЕДИНЕ */
+        .capture-button-bottom {
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             background: linear-gradient(135deg, #FF6B6B, #FF5252);
-            border: 8px solid white;
+            border: 6px solid white;
             color: white;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             cursor: pointer;
             transition: var(--transition);
             display: flex;
@@ -578,34 +568,34 @@
             animation: glow 2s infinite, pulse 2s infinite;
             box-shadow: 
                 0 20px 50px rgba(255, 107, 107, 0.6),
-                0 0 0 20px rgba(255, 107, 107, 0.3),
-                0 0 0 40px rgba(255, 107, 107, 0.15),
-                inset 0 0 30px rgba(255, 255, 255, 0.3);
+                0 0 0 15px rgba(255, 107, 107, 0.3),
+                0 0 0 30px rgba(255, 107, 107, 0.15),
+                inset 0 0 25px rgba(255, 255, 255, 0.3);
         }
 
-        .capture-button::before {
+        .capture-button-bottom::before {
             content: '';
             position: absolute;
-            top: -15px;
-            left: -15px;
-            right: -15px;
-            bottom: -15px;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
             border-radius: 50%;
-            border: 3px dashed rgba(255, 255, 255, 0.5);
+            border: 2px dashed rgba(255, 255, 255, 0.5);
             animation: rotate 10s linear infinite;
         }
 
-        .capture-button:hover {
+        .capture-button-bottom:hover {
             transform: scale(1.15);
             animation: glow 1s infinite, pulse 1s infinite;
             box-shadow: 
                 0 25px 60px rgba(255, 107, 107, 0.8),
-                0 0 0 25px rgba(255, 107, 107, 0.4),
-                0 0 0 50px rgba(255, 107, 107, 0.2),
-                inset 0 0 40px rgba(255, 255, 255, 0.4);
+                0 0 0 20px rgba(255, 107, 107, 0.4),
+                0 0 0 40px rgba(255, 107, 107, 0.2),
+                inset 0 0 35px rgba(255, 255, 255, 0.4);
         }
 
-        .capture-button:active {
+        .capture-button-bottom:active {
             animation: shutterClick 0.3s;
             transform: scale(0.9);
         }
@@ -615,22 +605,21 @@
             to { transform: rotate(360deg); }
         }
 
-        .capture-hint {
-            color: var(--sage-green);
-            font-size: 1.1rem;
-            text-align: center;
-            font-weight: 500;
-            padding: 15px 25px;
-            background: white;
-            border-radius: 50px;
-            border: 2px solid var(--mint-green);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            max-width: 300px;
-        }
-
-        .capture-hint i {
-            color: var(--mint-green);
-            margin-right: 10px;
+        /* Индикатор текущей камеры */
+        .camera-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         /* Стили для превью фото */
@@ -763,24 +752,31 @@
             }
             
             .camera-view {
-                height: 350px;
+                height: 400px;
             }
             
-            .capture-button {
-                width: 100px;
-                height: 100px;
+            .capture-button-bottom {
+                width: 90px;
+                height: 90px;
                 font-size: 2rem;
             }
             
-            .capture-button::before {
-                top: -12px;
-                left: -12px;
-                right: -12px;
-                bottom: -12px;
+            .capture-button-bottom::before {
+                top: -8px;
+                left: -8px;
+                right: -8px;
+                bottom: -8px;
             }
             
-            .camera-controls {
-                padding: 25px 20px;
+            .camera-switch-button {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+            
+            .camera-indicator {
+                padding: 6px 12px;
+                font-size: 0.8rem;
             }
             
             .preview-container {
@@ -813,26 +809,29 @@
                 font-size: 1.8rem;
             }
             
-            .camera-switch {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .camera-option {
-                max-width: 100%;
-            }
-            
-            .capture-button {
-                width: 90px;
-                height: 90px;
+            .capture-button-bottom {
+                width: 80px;
+                height: 80px;
                 font-size: 1.8rem;
-                border-width: 6px;
+                border-width: 5px;
             }
             
             .photo-action-button {
                 min-width: 100%;
                 padding: 20px 30px;
                 font-size: 1.3rem;
+            }
+            
+            .camera-switch-button {
+                top: 15px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+            }
+            
+            .camera-indicator {
+                top: 15px;
+                left: 15px;
             }
         }
     </style>
@@ -882,11 +881,11 @@
                 </div>
                 <div class="step">
                     <div class="step-number">2</div>
-                    <div class="step-text">Выберите камеру для селфи или окружения</div>
+                    <div class="step-text">Нажмите иконку в правом углу для смены камеры</div>
                 </div>
                 <div class="step">
                     <div class="step-number">3</div>
-                    <div class="step-text">Нажмите БОЛЬШУЮ КРАСНУЮ кнопку для снимка</div>
+                    <div class="step-text">Нажмите БОЛЬШУЮ КРАСНУЮ кнопку внизу для снимка</div>
                 </div>
                 <div class="step">
                     <div class="step-number">4</div>
@@ -922,7 +921,7 @@
         <div class="camera-container">
             <div class="camera-header">
                 <h2>Сделайте фото</h2>
-                <p>Выберите камеру и нажмите кнопку затвора</p>
+                <p>Используйте иконки для управления</p>
                 <button class="close-camera" id="closeCameraBtn">
                     <i class="fas fa-times"></i>
                 </button>
@@ -930,32 +929,23 @@
             
             <div class="camera-view">
                 <video id="cameraVideo" autoplay playsinline></video>
-            </div>
-            
-            <div class="camera-controls">
-                <div class="camera-switch">
-                    <div class="camera-option">
-                        <button class="camera-btn active" id="rearCameraBtn">
-                            <i class="fas fa-camera"></i>
-                            Задняя камера
-                        </button>
-                    </div>
-                    <div class="camera-option">
-                        <button class="camera-btn" id="frontCameraBtn">
-                            <i class="fas fa-user"></i>
-                            Фронтальная
-                        </button>
-                    </div>
+                
+                <!-- Индикатор текущей камеры -->
+                <div class="camera-indicator" id="cameraIndicator">
+                    <i class="fas fa-camera"></i>
+                    <span>Задняя</span>
                 </div>
                 
-                <div class="capture-section">
-                    <button class="capture-button" id="captureBtn">
+                <!-- Кнопка смены камеры в правом верхнем углу -->
+                <button class="camera-switch-button" id="switchCameraBtn">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                
+                <!-- Кнопка затвора посередине снизу -->
+                <div class="camera-controls-bottom">
+                    <button class="capture-button-bottom" id="captureBtn">
                         <i class="fas fa-camera"></i>
                     </button>
-                    <p class="capture-hint">
-                        <i class="fas fa-hand-point-up"></i>
-                        Нажмите красную кнопку для съёмки фото
-                    </p>
                 </div>
             </div>
         </div>
@@ -990,8 +980,8 @@
         const openCameraBtn = document.getElementById('openCameraBtn');
         const closeCameraBtn = document.getElementById('closeCameraBtn');
         const cameraVideo = document.getElementById('cameraVideo');
-        const rearCameraBtn = document.getElementById('rearCameraBtn');
-        const frontCameraBtn = document.getElementById('frontCameraBtn');
+        const switchCameraBtn = document.getElementById('switchCameraBtn');
+        const cameraIndicator = document.getElementById('cameraIndicator');
         const captureBtn = document.getElementById('captureBtn');
         const previewImage = document.getElementById('previewImage');
         const retakeBtn = document.getElementById('retakeBtn');
@@ -1003,6 +993,20 @@
         let currentFacingMode = 'environment';
         let capturedPhoto = null;
         let photoCount = 0;
+        
+        // Обновление индикатора камеры
+        function updateCameraIndicator() {
+            const icon = cameraIndicator.querySelector('i');
+            const text = cameraIndicator.querySelector('span');
+            
+            if (currentFacingMode === 'environment') {
+                icon.className = 'fas fa-camera';
+                text.textContent = 'Задняя';
+            } else {
+                icon.className = 'fas fa-user';
+                text.textContent = 'Фронтальная';
+            }
+        }
         
         // Запуск камеры
         async function startCamera(facingMode) {
@@ -1031,6 +1035,9 @@
                 } else {
                     cameraVideo.style.transform = 'scaleX(1)';
                 }
+                
+                // Обновляем индикатор
+                updateCameraIndicator();
                 
                 return true;
             } catch (err) {
@@ -1065,20 +1072,17 @@
         }
         
         // Переключение камеры
-        function switchCamera(facingMode) {
-            currentFacingMode = facingMode;
+        function switchCamera() {
+            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
             
-            // Обновляем активные кнопки
-            if (facingMode === 'environment') {
-                rearCameraBtn.classList.add('active');
-                frontCameraBtn.classList.remove('active');
-            } else {
-                frontCameraBtn.classList.add('active');
-                rearCameraBtn.classList.remove('active');
-            }
+            // Анимация кнопки
+            switchCameraBtn.style.animation = 'cameraSwitch 0.5s';
+            setTimeout(() => {
+                switchCameraBtn.style.animation = '';
+            }, 500);
             
             // Перезапускаем камеру
-            startCamera(facingMode);
+            startCamera(currentFacingMode);
         }
         
         // Сделать фото
@@ -1197,19 +1201,14 @@
         // Обработчики событий
         openCameraBtn.addEventListener('click', openCameraModal);
         closeCameraBtn.addEventListener('click', closeCameraModal);
-        
-        rearCameraBtn.addEventListener('click', () => switchCamera('environment'));
-        frontCameraBtn.addEventListener('click', () => switchCamera('user'));
-        
+        switchCameraBtn.addEventListener('click', switchCamera);
         captureBtn.addEventListener('click', capturePhoto);
-        
         retakeBtn.addEventListener('click', () => {
             closePreview();
             setTimeout(() => {
                 openCameraModal();
             }, 300);
         });
-        
         sendBtn.addEventListener('click', sendPhoto);
         
         // Закрытие по клику на фон
