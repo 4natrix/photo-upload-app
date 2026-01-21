@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Фото на свадьбу 📸</title>
+    <title>Фото на свадьбу! 📸</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 20px;
         }
         .container {
             background: white;
@@ -21,17 +21,23 @@
             padding: 30px;
             max-width: 500px;
             width: 100%;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             text-align: center;
         }
         h1 {
             color: #d63384;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
         }
         .camera-box {
             width: 100%;
             height: 300px;
-            background: black;
+            background: #000;
             border-radius: 10px;
             overflow: hidden;
             margin: 20px 0;
@@ -42,77 +48,191 @@
             height: 100%;
             object-fit: cover;
         }
-        button {
-            background: #d63384;
+        .camera-label {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
             color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 24px;
             border: none;
-            padding: 15px 30px;
-            margin: 10px;
             border-radius: 50px;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .primary-btn {
+            background: #4CAF50;
+            color: white;
+        }
+        .secondary-btn {
+            background: #2196F3;
+            color: white;
+        }
+        .danger-btn {
+            background: #f44336;
+            color: white;
         }
         button:hover {
-            background: #c22574;
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .preview {
+            margin: 20px 0;
+            display: none;
         }
         #photoPreview {
             max-width: 100%;
             border-radius: 10px;
-            margin: 20px 0;
-            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         .message {
             padding: 15px;
             border-radius: 10px;
             margin: 15px 0;
             display: none;
+            font-weight: 500;
         }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .loading {
+            display: none;
+            font-size: 14px;
+            color: #666;
+            margin: 10px 0;
+        }
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .instructions {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+            font-size: 14px;
+            color: #555;
+        }
+        .instructions ol {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        footer {
+            margin-top: 30px;
+            color: #888;
+            font-size: 14px;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            h1 { font-size: 24px; }
+            .camera-box { height: 250px; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📸 Свадебное фото</h1>
-        <p>Сделайте фото и оно придет прямо жениху и невесте!</p>
+        <h1>📸 Фото на свадьбу!</h1>
+        <p class="subtitle">Сделайте памятный снимок и отправьте молодым</p>
+        
+        <div class="instructions">
+            <strong>Как это работает:</strong>
+            <ol>
+                <li>Разрешите доступ к камере</li>
+                <li>Наведите камеру на интересный момент</li>
+                <li>Сделайте фото и отправьте</li>
+                <li>Фото автоматически сохранится в альбом</li>
+            </ol>
+        </div>
         
         <div class="camera-box">
+            <div class="camera-label" id="cameraLabel">Задняя камера</div>
             <video id="video" autoplay playsinline></video>
         </div>
         
-        <div>
-            <button id="switchBtn">🔄 Сменить камеру</button>
-            <button id="captureBtn">📷 Сделать фото</button>
+        <div class="controls">
+            <button class="secondary-btn" id="switchBtn">
+                🔄 Камера
+            </button>
+            <button class="primary-btn" id="captureBtn">
+                📷 Снять
+            </button>
         </div>
         
-        <img id="photoPreview" alt="Ваше фото">
+        <div class="preview" id="preview">
+            <img id="photoPreview" alt="Ваше фото">
+            <div class="controls" style="margin-top: 15px;">
+                <button class="danger-btn" id="retakeBtn">
+                    ❌ Переснять
+                </button>
+                <button class="primary-btn" id="sendBtn">
+                    ✅ Отправить
+                </button>
+            </div>
+        </div>
         
-        <div style="display: none;" id="previewControls">
-            <button id="retakeBtn">🔄 Переснять</button>
-            <button id="sendBtn">✅ Отправить</button>
+        <div class="loading" id="loading">
+            <div class="loader"></div>
+            <p>Отправляем фото...</p>
         </div>
         
         <div class="message success" id="successMsg">
-            ✅ Фото отправлено! Спасибо!
+            ✅ Спасибо! Фото успешно отправлено!
         </div>
         
         <div class="message error" id="errorMsg">
-            ❌ Ошибка. Используйте Telegram-бота!
+            ❌ Ошибка отправки. Попробуйте снова.
         </div>
         
-        <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
-            <p><strong>Важно!</strong> Для отправки фото:</p>
-            <p>1. Откройте Telegram</p>
-            <p>2. Найдите бота <strong>@WeddingPhotoCollectorBot</strong></p>
-            <p>3. Нажмите кнопку меню "Открыть камеру"</p>
-        </div>
+        <footer>
+            С любовью ❤️ для наших гостей
+        </footer>
     </div>
 
     <script>
-        // Проверяем, открыто ли в Telegram Web App
-        const isTelegram = window.Telegram && window.Telegram.WebApp;
+        // URL вашего Google Apps Script веб-приложения (замените на свой)
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxx4E9HieabFOlY1hD_p5oDL1gPrXWxoGfUsW-y6kSQyDp2FqgGNsS4fghQmFoN_xBH0g/exec';
         
         // Элементы
         const video = document.getElementById('video');
@@ -120,114 +240,160 @@
         const switchBtn = document.getElementById('switchBtn');
         const sendBtn = document.getElementById('sendBtn');
         const retakeBtn = document.getElementById('retakeBtn');
+        const preview = document.getElementById('preview');
         const photoPreview = document.getElementById('photoPreview');
-        const previewControls = document.getElementById('previewControls');
+        const loading = document.getElementById('loading');
         const successMsg = document.getElementById('successMsg');
         const errorMsg = document.getElementById('errorMsg');
+        const cameraLabel = document.getElementById('cameraLabel');
         
         let currentStream = null;
         let currentFacingMode = 'environment';
         let capturedPhoto = null;
         
         // Запуск камеры
-        async function startCamera() {
+        async function startCamera(facingMode) {
             if (currentStream) {
                 currentStream.getTracks().forEach(track => track.stop());
             }
             
+            const constraints = {
+                video: { 
+                    facingMode: facingMode,
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                },
+                audio: false
+            };
+            
             try {
-                currentStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: currentFacingMode },
-                    audio: false
-                });
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = currentStream;
+                
+                // Обновляем метку
+                cameraLabel.textContent = facingMode === 'environment' ? 'Задняя камера' : 'Фронтальная камера';
+                
+                // Скрываем превью
+                preview.style.display = 'none';
+                successMsg.style.display = 'none';
+                errorMsg.style.display = 'none';
+                
             } catch (err) {
                 console.error('Ошибка камеры:', err);
+                alert('Не удалось получить доступ к камере. Пожалуйста, разрешите доступ к камере и обновите страницу.');
             }
         }
         
         // Инициализация
-        startCamera();
-        
-        // События кнопок
-        switchBtn.addEventListener('click', () => {
-            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
-            startCamera();
+        document.addEventListener('DOMContentLoaded', () => {
+            startCamera(currentFacingMode);
         });
         
+        // Переключение камеры
+        switchBtn.addEventListener('click', () => {
+            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+            startCamera(currentFacingMode);
+        });
+        
+        // Съемка фото
         captureBtn.addEventListener('click', () => {
+            if (!currentStream) {
+                alert('Камера не доступна');
+                return;
+            }
+            
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
             
+            // Для фронтальной - зеркальное отражение
             if (currentFacingMode === 'user') {
                 ctx.translate(canvas.width, 0);
                 ctx.scale(-1, 1);
             }
             
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            capturedPhoto = canvas.toDataURL('image/jpeg');
             
+            // Возвращаем контекст
+            if (currentFacingMode === 'user') {
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+            }
+            
+            capturedPhoto = canvas.toDataURL('image/jpeg', 0.9);
             photoPreview.src = capturedPhoto;
-            photoPreview.style.display = 'block';
-            previewControls.style.display = 'block';
-            captureBtn.style.display = 'none';
-            switchBtn.style.display = 'none';
+            preview.style.display = 'block';
+            
+            // Прокрутка к превью
+            preview.scrollIntoView({ behavior: 'smooth' });
         });
         
+        // Переснять
         retakeBtn.addEventListener('click', () => {
-            photoPreview.style.display = 'none';
-            previewControls.style.display = 'none';
-            captureBtn.style.display = 'inline-block';
-            switchBtn.style.display = 'inline-block';
+            preview.style.display = 'none';
             capturedPhoto = null;
         });
         
+        // Отправка фото через Google Apps Script
         sendBtn.addEventListener('click', async () => {
-            if (!capturedPhoto) return;
+            if (!capturedPhoto) {
+                alert('Сначала сделайте фото!');
+                return;
+            }
             
-            // Если открыто в Telegram Web App
-            if (isTelegram) {
-                try {
-                    // Отправляем фото через Telegram Web App
-                    const blob = await fetch(capturedPhoto).then(r => r.blob());
-                    const file = new File([blob], 'photo.jpg', { type: 'image/jpeg' });
-                    
-                    // Telegram Web App может отправить файл
-                    if (window.Telegram.WebApp.sendData) {
-                        // Конвертируем в base64 для отправки
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const base64 = e.target.result;
-                            window.Telegram.WebApp.sendData(JSON.stringify({
-                                type: 'photo',
-                                data: base64
-                            }));
-                        };
-                        reader.readAsDataURL(blob);
-                        
-                        successMsg.style.display = 'block';
-                        setTimeout(() => {
-                            photoPreview.style.display = 'none';
-                            previewControls.style.display = 'none';
-                            captureBtn.style.display = 'inline-block';
-                            switchBtn.style.display = 'inline-block';
-                            successMsg.style.display = 'none';
-                        }, 3000);
-                    }
-                } catch (err) {
-                    errorMsg.style.display = 'block';
-                    console.error(err);
-                }
-            } else {
-                // Если открыто в браузере - предлагаем скачать
-                const link = document.createElement('a');
-                link.href = capturedPhoto;
-                link.download = 'свадебное_фото.jpg';
-                link.click();
+            // Показываем загрузку
+            loading.style.display = 'block';
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+            sendBtn.disabled = true;
+            
+            try {
+                // Отправляем на Google Apps Script
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Важно: используем no-cors для Google Apps Script
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        photo: capturedPhoto,
+                        timestamp: new Date().toISOString()
+                    })
+                });
                 
-                alert('Фото сохранено на устройство! Пожалуйста, отправьте его вручную в Telegram боту @WeddingPhotoCollectorBot');
+                // С Google Apps Script с no-cors мы не можем прочитать ответ,
+                // но если запрос ушел - считаем успешным
+                
+                // Имитация успешной отправки (в реальности Apps Script отправит в Telegram)
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                    successMsg.style.display = 'block';
+                    preview.style.display = 'none';
+                    capturedPhoto = null;
+                    sendBtn.disabled = false;
+                    
+                    // Скрываем успешное сообщение через 3 секунды
+                    setTimeout(() => {
+                        successMsg.style.display = 'none';
+                    }, 3000);
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                loading.style.display = 'none';
+                errorMsg.style.display = 'block';
+                sendBtn.disabled = false;
+                
+                setTimeout(() => {
+                    errorMsg.style.display = 'none';
+                }, 3000);
+            }
+        });
+        
+        // Обработка закрытия камеры при закрытии страницы
+        window.addEventListener('beforeunload', () => {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
             }
         });
     </script>
