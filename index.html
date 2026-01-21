@@ -8,10 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --deep-green: #0D2B25;
-            --forest-green: #1C463C;
-            --sage-green: #2D6357;
-            --mint-green: #4A9C88;
+            --emerald-dark: #0D2B25;
+            --emerald: #1C463C;
+            --emerald-light: #2D6357;
+            --mint: #4A9C88;
             --gold: #C5A572;
             --gold-light: #E8D9B5;
             --ivory: #F5F2E8;
@@ -29,13 +29,13 @@
         
         body {
             font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(135deg, var(--deep-green) 0%, var(--forest-green) 100%);
+            background: linear-gradient(135deg, var(--emerald-dark) 0%, var(--emerald) 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            color: var(--deep-green);
+            color: var(--emerald-dark);
             line-height: 1.6;
         }
 
@@ -51,7 +51,7 @@
 
         @keyframes pulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
 
@@ -62,8 +62,8 @@
         }
 
         @keyframes glow {
-            0%, 100% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.4); }
-            50% { box-shadow: 0 0 50px rgba(255, 255, 255, 0.7); }
+            0%, 100% { box-shadow: 0 0 30px rgba(197, 165, 114, 0.4); }
+            50% { box-shadow: 0 0 50px rgba(197, 165, 114, 0.7); }
         }
 
         @keyframes heartBeat {
@@ -100,7 +100,7 @@
             left: 0;
             right: 0;
             height: 5px;
-            background: linear-gradient(90deg, var(--mint-green), var(--gold), var(--mint-green));
+            background: linear-gradient(90deg, var(--mint), var(--gold), var(--mint));
         }
 
         .header {
@@ -112,7 +112,7 @@
             font-family: 'Cormorant Garamond', serif;
             font-size: 2.8rem;
             font-weight: 600;
-            color: var(--forest-green);
+            color: var(--emerald);
             letter-spacing: 1px;
             position: relative;
             display: flex;
@@ -148,7 +148,7 @@
 
         .wedding-date {
             font-size: 1.3rem;
-            color: var(--sage-green);
+            color: var(--emerald-light);
             font-weight: 400;
             letter-spacing: 2px;
             margin-top: 35px;
@@ -162,7 +162,7 @@
         .title {
             font-family: 'Cormorant Garamond', serif;
             font-size: 2.4rem;
-            color: var(--forest-green);
+            color: var(--emerald);
             margin: 40px 0 25px;
             font-weight: 500;
             position: relative;
@@ -175,7 +175,7 @@
 
         .description {
             font-size: 1.15rem;
-            color: var(--sage-green);
+            color: var(--emerald-light);
             margin-bottom: 40px;
             line-height: 1.8;
             padding: 0 20px;
@@ -210,7 +210,7 @@
             left: -3px;
             right: -3px;
             bottom: -3px;
-            background: conic-gradient(from 0deg, var(--gold), var(--mint-green), var(--gold));
+            background: conic-gradient(from 0deg, var(--gold), var(--mint), var(--gold));
             border-radius: 50%;
             z-index: -1;
             animation: pulse 4s infinite linear;
@@ -221,14 +221,14 @@
             color: var(--gold);
         }
 
-        /* Кнопка сделать фото на главной */
+        /* Кнопка СДЕЛАТЬ ФОТО в изумрудном-золотом стиле */
         .photo-action {
             margin: 40px 0;
             text-align: center;
         }
 
         .photo-action-button {
-            background: linear-gradient(135deg, var(--gold), var(--accent));
+            background: linear-gradient(135deg, var(--emerald-light), var(--emerald));
             color: white;
             border: none;
             padding: 25px 60px;
@@ -241,11 +241,11 @@
             align-items: center;
             justify-content: center;
             gap: 20px;
-            box-shadow: 0 15px 35px rgba(197, 165, 114, 0.4);
+            box-shadow: 0 15px 35px rgba(45, 99, 87, 0.4);
             position: relative;
             overflow: hidden;
             font-family: 'Cormorant Garamond', serif;
-            border: 3px solid var(--gold-light);
+            border: 3px solid var(--gold);
             min-width: 300px;
             animation: pulse 2s infinite;
         }
@@ -267,17 +267,20 @@
 
         .photo-action-button:hover {
             transform: translateY(-8px) scale(1.08);
-            box-shadow: 0 25px 50px rgba(197, 165, 114, 0.6);
+            box-shadow: 0 25px 50px rgba(45, 99, 87, 0.6);
             animation: none;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
         }
 
         .photo-action-button i {
             font-size: 2rem;
             transition: var(--transition);
+            color: var(--gold-light);
         }
 
         .photo-action-button:hover i {
             transform: rotate(15deg);
+            color: white;
         }
 
         .instructions {
@@ -302,7 +305,7 @@
         }
 
         .instructions h3 {
-            color: var(--forest-green);
+            color: var(--emerald);
             margin-bottom: 20px;
             font-size: 1.2rem;
             font-weight: 500;
@@ -325,7 +328,7 @@
             padding: 15px 20px;
             background: white;
             border-radius: 15px;
-            border-left: 5px solid var(--mint-green);
+            border-left: 5px solid var(--mint);
             transition: var(--transition);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
@@ -338,7 +341,7 @@
         .step-number {
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, var(--mint-green), var(--sage-green));
+            background: linear-gradient(135deg, var(--mint), var(--emerald-light));
             color: white;
             border-radius: 50%;
             display: flex;
@@ -351,7 +354,7 @@
         }
 
         .step-text {
-            color: var(--deep-green);
+            color: var(--emerald-dark);
             text-align: left;
             flex: 1;
             font-size: 1rem;
@@ -359,11 +362,11 @@
 
         .message {
             background: linear-gradient(135deg, rgba(77, 156, 136, 0.1), rgba(197, 165, 114, 0.1));
-            color: var(--forest-green);
+            color: var(--emerald);
             padding: 30px;
             border-radius: 22px;
             margin: 30px 0;
-            border: 2px solid var(--mint-green);
+            border: 2px solid var(--mint);
             display: none;
             animation: fadeIn 0.5s ease-out;
             text-align: center;
@@ -380,7 +383,7 @@
             font-size: 3rem;
             margin-bottom: 20px;
             display: block;
-            color: var(--mint-green);
+            color: var(--mint);
         }
 
         .message.error i {
@@ -391,7 +394,7 @@
             margin-top: 50px;
             padding-top: 30px;
             border-top: 2px solid var(--gold-light);
-            color: var(--sage-green);
+            color: var(--emerald-light);
             font-size: 1rem;
             font-style: italic;
         }
@@ -404,7 +407,7 @@
         }
 
         .heart {
-            color: var(--mint-green);
+            color: var(--mint);
             animation: heartBeat 1.5s infinite;
         }
 
@@ -446,7 +449,7 @@
         }
 
         .camera-header {
-            background: linear-gradient(135deg, var(--deep-green), var(--forest-green));
+            background: linear-gradient(135deg, var(--emerald-dark), var(--emerald));
             padding: 30px;
             text-align: center;
             color: white;
@@ -549,13 +552,13 @@
             align-items: center;
         }
 
-        /* КНОПКА ЗАТВОРА ПОСЕРЕДИНЕ */
+        /* КНОПКА ЗАТВОРА в изумрудном-золотом стиле */
         .capture-button-bottom {
             width: 100px;
             height: 100px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #FF6B6B, #FF5252);
-            border: 6px solid white;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            border: 6px solid var(--gold);
             color: white;
             font-size: 2.2rem;
             cursor: pointer;
@@ -567,10 +570,10 @@
             z-index: 10;
             animation: glow 2s infinite, pulse 2s infinite;
             box-shadow: 
-                0 20px 50px rgba(255, 107, 107, 0.6),
-                0 0 0 15px rgba(255, 107, 107, 0.3),
-                0 0 0 30px rgba(255, 107, 107, 0.15),
-                inset 0 0 25px rgba(255, 255, 255, 0.3);
+                0 20px 50px rgba(45, 99, 87, 0.6),
+                0 0 0 15px rgba(197, 165, 114, 0.3),
+                0 0 0 30px rgba(77, 156, 136, 0.15),
+                inset 0 0 25px rgba(255, 255, 255, 0.2);
         }
 
         .capture-button-bottom::before {
@@ -581,18 +584,20 @@
             right: -10px;
             bottom: -10px;
             border-radius: 50%;
-            border: 2px dashed rgba(255, 255, 255, 0.5);
+            border: 2px dashed var(--gold-light);
             animation: rotate 10s linear infinite;
+            opacity: 0.5;
         }
 
         .capture-button-bottom:hover {
             transform: scale(1.15);
             animation: glow 1s infinite, pulse 1s infinite;
+            background: linear-gradient(135deg, var(--emerald-dark), var(--emerald));
             box-shadow: 
-                0 25px 60px rgba(255, 107, 107, 0.8),
-                0 0 0 20px rgba(255, 107, 107, 0.4),
-                0 0 0 40px rgba(255, 107, 107, 0.2),
-                inset 0 0 35px rgba(255, 255, 255, 0.4);
+                0 25px 60px rgba(45, 99, 87, 0.8),
+                0 0 0 20px rgba(197, 165, 114, 0.4),
+                0 0 0 40px rgba(77, 156, 136, 0.2),
+                inset 0 0 35px rgba(255, 255, 255, 0.3);
         }
 
         .capture-button-bottom:active {
@@ -652,7 +657,7 @@
         .preview-title {
             font-family: 'Cormorant Garamond', serif;
             font-size: 2.2rem;
-            color: var(--forest-green);
+            color: var(--emerald);
             margin-bottom: 30px;
         }
 
@@ -690,8 +695,8 @@
 
         .btn-retake {
             background: white;
-            color: var(--sage-green);
-            border-color: var(--sage-green);
+            color: var(--emerald-light);
+            border-color: var(--emerald-light);
         }
 
         .btn-retake:hover {
@@ -701,7 +706,7 @@
         }
 
         .btn-send {
-            background: linear-gradient(135deg, var(--sage-green), var(--forest-green));
+            background: linear-gradient(135deg, var(--emerald-light), var(--emerald));
             color: white;
             border: none;
             box-shadow: 0 10px 25px rgba(45, 99, 87, 0.4);
@@ -710,7 +715,7 @@
         .btn-send:hover {
             transform: translateY(-3px);
             box-shadow: 0 15px 30px rgba(45, 99, 87, 0.6);
-            background: linear-gradient(135deg, var(--forest-green), var(--deep-green));
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
         }
 
         @media (max-width: 600px) {
@@ -885,7 +890,7 @@
                 </div>
                 <div class="step">
                     <div class="step-number">3</div>
-                    <div class="step-text">Нажмите БОЛЬШУЮ КРАСНУЮ кнопку внизу для снимка</div>
+                    <div class="step-text">Нажмите БОЛЬШУЮ КНОПКУ внизу для снимка</div>
                 </div>
                 <div class="step">
                     <div class="step-number">4</div>
@@ -993,6 +998,7 @@
         let currentFacingMode = 'environment';
         let capturedPhoto = null;
         let photoCount = 0;
+        let isCameraActive = false;
         
         // Обновление индикатора камеры
         function updateCameraIndicator() {
@@ -1008,7 +1014,7 @@
             }
         }
         
-        // Запуск камеры
+        // Запуск камеры с обработкой ошибок
         async function startCamera(facingMode) {
             // Останавливаем предыдущую камеру
             if (currentStream) {
@@ -1018,8 +1024,8 @@
             const constraints = {
                 video: { 
                     facingMode: facingMode,
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
                     frameRate: { ideal: 30 }
                 },
                 audio: false
@@ -1038,11 +1044,24 @@
                 
                 // Обновляем индикатор
                 updateCameraIndicator();
+                isCameraActive = true;
                 
                 return true;
             } catch (err) {
                 console.error('Ошибка камеры:', err);
-                showError('Не удалось получить доступ к камере', 'Пожалуйста, разрешите доступ к камере');
+                isCameraActive = false;
+                
+                // Показываем дружелюбное сообщение об ошибке
+                if (err.name === 'NotAllowedError') {
+                    showError('Доступ к камере запрещен', 'Пожалуйста, разрешите доступ к камере в настройках браузера');
+                } else if (err.name === 'NotFoundError') {
+                    showError('Камера не найдена', 'Убедитесь, что камера подключена и не используется другим приложением');
+                } else if (err.name === 'NotReadableError') {
+                    showError('Камера недоступна', 'Камера используется другим приложением. Закройте другие приложения, использующие камеру');
+                } else {
+                    showError('Ошибка камеры', 'Пожалуйста, обновите страницу и попробуйте снова');
+                }
+                
                 closeCameraModal();
                 return false;
             }
@@ -1069,10 +1088,13 @@
                 currentStream.getTracks().forEach(track => track.stop());
                 currentStream = null;
             }
+            isCameraActive = false;
         }
         
         // Переключение камеры
         function switchCamera() {
+            if (!isCameraActive) return;
+            
             currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
             
             // Анимация кнопки
@@ -1087,7 +1109,7 @@
         
         // Сделать фото
         function capturePhoto() {
-            if (!currentStream) {
+            if (!isCameraActive || !currentStream) {
                 showError('Камера не доступна', 'Пожалуйста, разрешите доступ к камере');
                 return;
             }
@@ -1182,7 +1204,7 @@
                 showError('Ошибка отправки', 'Пожалуйста, попробуйте ещё раз');
             } finally {
                 // Восстанавливаем кнопку
-                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить в альбом';
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправть в альбом';
                 sendBtn.disabled = false;
             }
         }
@@ -1242,6 +1264,11 @@
                 currentStream.getTracks().forEach(track => track.stop());
             }
         });
+        
+        // Проверка поддержки API
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('Ваш браузер не поддерживает доступ к камере. Пожалуйста, используйте современный браузер (Chrome, Firefox, Safari).');
+        }
     </script>
 </body>
 </html>
